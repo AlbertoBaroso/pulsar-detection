@@ -1,0 +1,8 @@
+desktop.ini
+*.log
+*.fls
+*.aux
+*.gz
+*.fdb_latexmk
+*.bbl
+*.blg
