@@ -135,7 +135,7 @@ An initial analysis of the raw features of the training data shows that:
     \begin{center}
         \begin{tabular}{ccc}
             \hspace*{-65pt}
-            \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/excess_kurtosis_dm-snr-mean_dm-snr.png}}            &
+            \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/excess_kurtosis_dm-snr-mean_dm-snr.png}}        &
             \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/stdev_ip-stdev_dm-snr.png}}                     &
             \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/stdev_ip-excess_kurtosis_dm-snr.png}}             \\
             \hspace*{-65pt}
@@ -158,11 +158,11 @@ An initial analysis of the raw features of the training data shows that:
     \begin{center}
         \hspace*{-65pt}
         \begin{tabular}{ccc}
-            \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/excess_kurtosis_ip-skewness_ip.png}} &
+            \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/excess_kurtosis_ip-skewness_ip.png}}            &
             \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/excess_kurtosis_dm-snr-excess_kurtosis_ip.png}} &
-            \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/excess_kurtosis_dm-snr-skewness_dm-snr.png}} \\
-            \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/excess_kurtosis_dm-snr-skewness_ip.png}} &
-            \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/skewness_ip-skewness_dm-snr.png}}  \\
+            \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/excess_kurtosis_dm-snr-skewness_dm-snr.png}}      \\
+            \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/excess_kurtosis_dm-snr-skewness_ip.png}}        &
+            \subfloat[]{\includegraphics[width = 160pt]{img/unprocessed_feature_pairs/skewness_ip-skewness_dm-snr.png}}                 \\
         \end{tabular}
     \end{center}
 \end{figure}
@@ -171,17 +171,47 @@ An initial analysis of the raw features of the training data shows that:
 % Classes are highly imbalanced.
 % 
 
-Observing the feature pairs it's possible to note that there isn't one that allows to find a clear separation of the two classes. 
-\vspace*{0.5cm}
+Observing the feature pairs it's possible to note that there isn't one that allows to find a clear separation of the two classes.
+\vspace*{0.5cm}\\
 The combination of features represented in graphs (n), (p), (ab), (af) and (ah) get close to identify regions of space where samples are well separated.
 \vspace*{0.5cm}\\
 The least useful pairs of features are represented in graphs (q), (s), (u) and (ac), where samples are almost entirely overlapping.
+\vspace*{0.5cm}\\
+The plots also show that some pair of features share similar distributions, implying that there's a correlation between them.
 
 % TODO: gaussianize features
-% TODO: feature correlation: compute pearson correlation heatmap
 
+\clearpage
+\subsection{Feature correlation}
+
+Computing the pearson correlation between all pairs of raw features and plotting it as a heatmap we obtain the following result:
+\begin{figure}[H]
+    \begin{center}
+        \subfloat[Pearson correlation heatmap]{\includegraphics[width = 320pt]{img/pearson_correlation/raw_heatmap.png}}
+    \end{center}
+\end{figure}
+The heatmap clearly shows that the following pairs of features are strongly correlated:
+\begin{enumerate}
+    \item (0) Mean of the integrated profile - (1) Standard deviation of the integrated profile.
+    \item (2) Excess kurtosis of the integrated profile - (3) Skewness of the integrated profile.
+    \item (4) Mean of the DM-SNR curve - (5) Standard deviation of the DM-SNR curve.
+    \item (6) Excess kurtosis of the DM-SNR curve - (7) Skewness of the DM-SNR curve.
+\end{enumerate}
+
+While the following pairs of features are weakly correlated, with a pearson coefficient close to 0.4:
+\begin{enumerate}
+    \item (2) Excess kurtosis of the integrated profile - (4) Mean of the DM-SNR curve
+    \item (2) Excess kurtosis of the integrated profile - (5) Standard deviation of the DM-SNR curve
+    \item (3) Skewness of the integrated profile - (4) Mean of the DM-SNR curve
+    \item (3) Skewness of the integrated profile - (5) Standard deviation of the DM-SNR curve
+\end{enumerate}
 \clearpage
 \bibliographystyle{unsrt}
 \bibliography{citations}
+
+
+
+% TODO: WHERE TO PUT THIS?
+Linear Discriminant Analysis (LDA) is deemed not useful as a preprocessing step for this project as LDA allows to find at most c - 1 discriminant directions, where c is the number of classes, thus we could find at most 1 direction.
 
 \end{document}

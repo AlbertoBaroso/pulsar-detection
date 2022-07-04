@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import sys
 sys.path.append("./")
 from utils.data_load import load_training, load_features
+from utils.analytics import pearson_correlation
 
 
 def plot_features_histograms(features, samples, labels):
@@ -39,11 +40,19 @@ def plot_feature_pairs_sctterplots(features, samples, labels):
                 plt.show()
 
 
+def plot_correlation_heatmap(samples):
+    pearson_matrix = pearson_correlation(samples)
+    plt.imshow(pearson_matrix, cmap='gist_yarg', vmin=-1, vmax=1)
+    plt.show()
+    
+
+
 if __name__ == '__main__':
 
     # Load data from file
     samples, labels = load_training()
     features = load_features()
     
-    plot_features_histograms(features, samples, labels)
-    plot_feature_pairs_sctterplots(features, samples, labels)
+    plot_correlation_heatmap(samples)
+    # plot_features_histograms(features, samples, labels)
+    # plot_feature_pairs_sctterplots(features, samples, labels)
