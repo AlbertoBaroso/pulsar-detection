@@ -1,8 +1,8 @@
 import numpy
 import sys
 sys.path.append("./")
-from utils.data_load import load_training, load_features
-from utils.preprocessing import vcol    
+from data_processing.data_load import load_training, load_features
+from data_processing.utils import vcol    
 
 # Compute mean, min and max value of each feature
 def compute_analytics(features, samples):

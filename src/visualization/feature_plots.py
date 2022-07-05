@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import sys
 sys.path.append("./")
-from utils.data_load import load_training, load_features
-from utils.analytics import pearson_correlation
+from data_processing.data_load import load_training, load_features
+from data_processing.analytics import pearson_correlation
 
 
 def plot_features_histograms(features, samples, labels):
@@ -54,5 +54,5 @@ if __name__ == '__main__':
     features = load_features()
     
     plot_correlation_heatmap(samples)
-    # plot_features_histograms(features, samples, labels)
-    # plot_feature_pairs_sctterplots(features, samples, labels)
+    plot_features_histograms(features, samples, labels)
+    plot_feature_pairs_sctterplots(features, samples, labels)

@@ -2,8 +2,8 @@ import numpy
 import scipy
 import sys
 sys.path.append("./")
-from utils.preprocessing import vrow, vcol
-from utils.analytics import empirical_mean, covariance_matrix, logpdf_GAU_ND, pdf
+from data_processing.utils import vrow, vcol
+from data_processing.analytics import empirical_mean, covariance_matrix, logpdf_GAU_ND, pdf
 
 ## Tied covariance Gaussian Classifier ##
 def train_tied_covariance_gaussian_model(DTR, LTR, DTE, class_priors):

@@ -1,9 +1,13 @@
 import numpy
+import scipy
+import sys
+sys.path.append("./")
+from data_processing.analytics import covariance_matrix
+from data_processing.utils import vcol
 
 
 def lda(D, L, m):
 
-    from utils.analytics import covariance_matrix
 
     def most_discriminant_egienvectors(C, m):
         # Compute eigenvectors
@@ -108,7 +112,6 @@ def pca(D, m, labels):
 
     # Compute covariance matrix
     C = numpy.dot(DC, DC.T) / float(D.shape[1])
-    from utils.analytics import covariance_matrix
     C2 = covariance_matrix(DC)
 
     # Retrieve The m leading eigenvectors from U (Principal components)

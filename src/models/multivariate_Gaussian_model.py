@@ -1,8 +1,8 @@
 import numpy
 import sys
 sys.path.append("./")
-from utils.preprocessing import vrow, vcol
-from utils.analytics import empirical_mean, covariance_matrix
+from data_processing.utils import vrow, vcol
+from data_processing.analytics import empirical_mean, covariance_matrix
 from scipy import special
 
 # MULTIVARIATE GAUSSIAN DISTRIBUTION

@@ -1,6 +1,6 @@
 import sys
 sys.path.append("./")
-from utils.preprocessing import one_dimensional_array
+from data_processing.utils import one_dimensional_array
 
 
 # Compute error rate as (#correctly_predicted / #total_samples)
