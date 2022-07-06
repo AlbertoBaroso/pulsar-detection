@@ -30,20 +30,20 @@ def lda(D, L, m):
     non_pulsar = D[:, L == 1]
 
     # Compute covariance matrix
-    C_setosa = covariance_matrix(pulsar)
-    C_versicolor = covariance_matrix(non_pulsar)
+    C_pulsar = covariance_matrix(pulsar)
+    C_non_pulsar = covariance_matrix(non_pulsar)
 
-    n_samples_setosa = pulsar.shape[1]
-    n_samples_versicolor = non_pulsar.shape[1]
-    N = n_samples_setosa + n_samples_versicolor
-    SW = ((C_setosa * n_samples_setosa) + (C_versicolor * n_samples_versicolor)) / N
+    n_samples_pulsar = pulsar.shape[1]
+    n_samples_non_pulsar = non_pulsar.shape[1]
+    N = n_samples_pulsar + n_samples_non_pulsar
+    SW = ((C_pulsar * n_samples_pulsar) + (C_non_pulsar * n_samples_non_pulsar)) / N
 
     # mu is the global mean of the dataset
     mu = D.mean(1)
-    mu_setosa = vcol(pulsar.mean(axis=1) - mu)
-    mu_versicolor = vcol(non_pulsar.mean(axis=1) - mu)
-    SB = ((n_samples_setosa * numpy.dot(mu_setosa, mu_setosa.T)) +
-          (n_samples_versicolor * numpy.dot(mu_versicolor, mu_versicolor.T))) / N
+    mu_pulsar = vcol(pulsar.mean(axis=1) - mu)
+    mu_non_pulsar = vcol(non_pulsar.mean(axis=1) - mu)
+    SB = ((n_samples_pulsar * numpy.dot(mu_pulsar, mu_pulsar.T)) +
+          (n_samples_non_pulsar * numpy.dot(mu_non_pulsar, mu_non_pulsar.T))) / N
 
 
     ### SOLVE THE GENERALIZED EIGENVALUE PROBLEM ###
@@ -112,21 +112,20 @@ def pca(D, m, labels):
 
     # Compute covariance matrix
     C = numpy.dot(DC, DC.T) / float(D.shape[1])
-    C2 = covariance_matrix(DC)
 
     # Retrieve The m leading eigenvectors from U (Principal components)
     # (We reverse the order of the columns of U so that the leading eigenvectors are in the first m columns):
     directions = pca_projection_matrix(C, m)
 
-    # Scatterplot
-    # pulsar = D[:, labels == 1]
-    # non_pulsar = D[:, labels == 0]
-    # pulsar = numpy.dot(directions.T, pulsar)
-    # non_pulsar = numpy.dot(directions.T, non_pulsar)
+    projected_data = numpy.dot(directions.T, D)
+    
+    # import matplotlib.pyplot as plt
+    # pulsar = projected_data[:, labels == 1]
+    # non_pulsar = projected_data[:, labels == 0]
     # plt.plot(pulsar[0], pulsar[1], linestyle='', marker='.', markersize=10, label="Pulsar")
     # plt.plot(non_pulsar[0], non_pulsar[1], linestyle='', marker='.', markersize=10, label="Non pulsar")
     # plt.plot()
     # plt.legend()
     # plt.show()
 
-    return numpy.dot(directions.T, D)
+    return numpy.dot(directions, projected_data)

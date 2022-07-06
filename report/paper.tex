@@ -179,15 +179,13 @@ The least useful pairs of features are represented in graphs (q), (s), (u) and (
 \vspace*{0.5cm}\\
 The plots also show that some pair of features share similar distributions, implying that there's a correlation between them.
 
-% TODO: gaussianize features
-
 \clearpage
 \subsection{Feature correlation}
 
 Computing the pearson correlation between all pairs of raw features and plotting it as a heatmap we obtain the following result:
 \begin{figure}[H]
     \begin{center}
-        \subfloat[Pearson correlation heatmap]{\includegraphics[width = 320pt]{img/pearson_correlation/raw_heatmap.png}}
+        \subfloat[Pearson correlation heatmap RAW]{\includegraphics[width = 320pt]{img/pearson_correlation/raw_heatmap.png}}
     \end{center}
 \end{figure}
 The heatmap clearly shows that the following pairs of features are strongly correlated:
@@ -205,6 +203,15 @@ While the following pairs of features are weakly correlated, with a pearson coef
     \item (3) Skewness of the integrated profile - (4) Mean of the DM-SNR curve
     \item (3) Skewness of the integrated profile - (5) Standard deviation of the DM-SNR curve
 \end{enumerate}
+
+The results from the correlation analysis suggest that models might benefit from applying a dimensionality reduction technique such as PCA to reduce the feature space to 4 uncorrelated features.
+\begin{figure}[H]
+    \begin{center}
+        \subfloat[Pearson correlation heatmap PCA]{\includegraphics[width = 320pt]{img/pearson_correlation/pca_heatmap.png}}
+    \end{center}
+\end{figure}
+Recomputing the pearson correlation and plotting it as a heatmap it's possible to see that the remaining 4 features are now uncorrelated.
+
 \clearpage
 \bibliographystyle{unsrt}
 \bibliography{citations}
@@ -213,5 +220,20 @@ While the following pairs of features are weakly correlated, with a pearson coef
 
 % TODO: WHERE TO PUT THIS?
 Linear Discriminant Analysis (LDA) is deemed not useful as a preprocessing step for this project as LDA allows to find at most c - 1 discriminant directions, where c is the number of classes, thus we could find at most 1 direction.
+
+We expect the MVG with naive bayes assumption model to perform worse that the others on the raw feature because we have seen from the correlation heatmap that some features are strongly correlated and by definition the naive bayes model assumes that the features are independent.                                          
+One other reason to believe that this model will have poor perform is that it is usually employed 
+%TODO: CHECK THIS and improve it
+when the samples are few and dimensions are a lot
+
+
+
+
+
+
+
+
+
+
 
 \end{document}

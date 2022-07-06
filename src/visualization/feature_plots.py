@@ -3,8 +3,9 @@ import sys
 sys.path.append("./")
 from data_processing.data_load import load_training, load_features
 from data_processing.analytics import pearson_correlation
+from data_processing.dimensionality_reduction import pca
 
-
+# Plot histogram for all features
 def plot_features_histograms(features, samples, labels):
 
     # Get samples by class
@@ -19,6 +20,19 @@ def plot_features_histograms(features, samples, labels):
         plt.legend()
         plt.show()
 
+# Plot histogram for only one feature
+def plot_feature_histogram(feature, samples, labels):
+
+    # Get samples by class
+    non_pulsars = samples[labels == 0]
+    pulsars = samples[labels == 1]
+
+    # Plot histogram
+    plt.hist(non_pulsars, bins=50, density=True, label="Non pulsars", alpha=0.4)
+    plt.hist(pulsars, bins=50, density=True, label="Pulsars", alpha=0.4)
+    plt.xlabel(feature)
+    plt.legend()
+    plt.show()
 
 def plot_feature_pairs_sctterplots(features, samples, labels):
 
@@ -53,6 +67,9 @@ if __name__ == '__main__':
     samples, labels = load_training()
     features = load_features()
     
+    pca_samples = pca(samples, 4, labels)
+    
     plot_correlation_heatmap(samples)
-    plot_features_histograms(features, samples, labels)
-    plot_feature_pairs_sctterplots(features, samples, labels)
+    plot_correlation_heatmap(pca_samples)
+    # plot_features_histograms(features, samples, labels)
+    # plot_feature_pairs_sctterplots(features, samples, labels)
