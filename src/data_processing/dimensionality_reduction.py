@@ -6,7 +6,6 @@ import numpy
 
 def lda(D, L, m):
 
-
     def most_discriminant_egienvectors(C, m):
         # Compute eigenvectors
         s, U = numpy.linalg.eigh(C)

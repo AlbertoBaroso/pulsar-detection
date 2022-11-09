@@ -2,8 +2,9 @@ from data_processing.data_load import load_training, load_features
 from data_processing.utils import vcol
 import numpy
 
-# Compute mean, min and max value of each feature
+
 def compute_analytics(features, samples):
+    """ Compute and print: mean, min and max value of each feature """
     print("Feature \t\t\t\t\t│  Mean \t│  Min \t\t│  Max")
     print("─" * 90)
     for i, feature in enumerate(features):
@@ -16,15 +17,17 @@ def compute_analytics(features, samples):
 
 
 def pearson_correlation(samples):
+    """ Compute the Pearson correlation coefficient between each pair of features """
     return numpy.absolute(numpy.corrcoef(samples))
 
-# Compute empirical mean
-def empirical_mean(array):
+
+def empirical_mean(array: numpy.ndarray) -> numpy.ndarray:
+    """ Compute the empirical mean of a dataset """
     return vcol(array.mean(1))
 
 
-## DIMENSIONALITY  REDUCTION ##
-def covariance_matrix(D):
+def covariance_matrix(D: numpy.ndarray) -> numpy.ndarray:
+    """ Compute the covariance matrix for a dataset """
     # Compute mean foreach column (feature)
     mu = empirical_mean(D)
     # Compute the 0-mean matrix (centered data)
@@ -34,8 +37,63 @@ def covariance_matrix(D):
     return C
 
 
+def between_class_covariance_matrix(D: numpy.ndarray, labels: numpy.ndarray, classes: numpy.ndarray) -> numpy.ndarray:
+    """ 
+        Compute the between-class covariance matrix of a dataset D 
+
+        Parameters
+        ----------  
+        D: The entire dataset
+        labels: Labels of each sample
+        classes: List of all distinct labels
+    """
+    mu = D.mean(axis=1)  # Dataset mean
+    N = float(D.shape[1])  # Number of samples
+    SB = 0
+    for c in classes:
+        samples_of_class_c = D[:, labels == c]
+        nc = float(samples_of_class_c.shape[1])  # Number of samples in class c
+        mu_c = samples_of_class_c.mean(axis=1)  # Mean of class c
+        m = vcol(mu_c - mu)
+        # Contribution of class c to the between-class covariance matrix
+        SB += nc * numpy.dot(m, m.T)
+    return SB / N
+
+
+def within_class_covariance_matrix(D: numpy.ndarray, labels: numpy.ndarray, classes: numpy.ndarray) -> numpy.ndarray:
+    """ 
+        Compute the between-class covariance matrix of a dataset D 
+
+        Parameters
+        ----------  
+        D: The entire dataset
+        labels: Labels of each sample
+        classes: List of all distinct labels
+    """
+    N = float(D.shape[1])  # Number of samples
+    SW = 0
+    for c in classes:
+        samples_of_class_c = D[:, labels == c]
+        nc = float(samples_of_class_c.shape[1])  # Number of samples in class c
+        SW += nc * covariance_matrix(samples_of_class_c)
+    return SW / N
+
+
 # compute the log-densities for samples X
-def logpdf_GAU_ND(X, mu, C):
+def logpdf_GAU_ND(X: numpy.ndarray, mu: numpy.ndarray, C: numpy.ndarray) -> numpy.ndarray:
+    """ 
+        Compute the log-density of a multivariate Gaussian distribution for all samples
+
+        Parameters
+        ----------
+        X (numpy.ndarray):  Original dataset, of shape (n, m) where n is the number of features and m is the number of samples
+        mu (numpy.ndarray): Mean of the MVG distribution, it has shape (n, 1)
+        C (numpy.ndarray):  Covariance matrix of the MVG distribution, it has shape (n, n)
+
+        Returns
+        -------
+        numpy.ndarray: the log-density of the MVG distribution computed for each sample, it has shape (m, 1)
+    """
     covariance_inverse = numpy.linalg.inv(C)
     M = X.shape[0]
     # the absolute value of the log-determinant is the second value
@@ -49,21 +107,18 @@ def logpdf_GAU_ND(X, mu, C):
         Y = numpy.append(Y, log_density)
     return Y.ravel()
 
-# Compute the density for a matrix of samples X
-def pdf(X, mu, C):
-    # Takes the exponent of the logarithm, so just the density not the log-density
-    return numpy.exp(logpdf_GAU_ND(X, mu, C))
 
-
-def z_normalization(features):
+def z_normalization(features) -> numpy.ndarray:
+    """ Compute the z-normalization of a set of features """
     z_scores = numpy.array(
         [(feature - feature.mean()) / st_dev(feature) for feature in features])
     return z_scores
 
 
-def st_dev(samples):
+def st_dev(samples: numpy.ndarray) -> float:
+    """ Compute the standard deviation of a set of samples """
     mu = samples.mean()
-    differences = [(value - mu)**2 for value in samples]
+    differences = [(value - mu) ** 2 for value in samples]
     sum_of_differences = sum(differences)
     standard_deviation = (sum_of_differences / (len(samples) - 1)) ** 0.5
     return standard_deviation

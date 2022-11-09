@@ -40,7 +40,6 @@ if __name__ == '__main__':
     sys.path.append("./")
     from data_processing.data_load import load_training, load_features, load_test
     from visualization.feature_plots import plot_feature_histogram
-    import matplotlib.pyplot as plt
     
     features = load_features()
     training_samples, training_labels = load_training()
