@@ -1,7 +1,5 @@
-import numpy
-import sys
-sys.path.append("./")
 from data_processing.utils import vcol
+import numpy
 
 
 def load_features():

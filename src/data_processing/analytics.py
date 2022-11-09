@@ -1,8 +1,6 @@
-import numpy
-import sys
-sys.path.append("./")
 from data_processing.data_load import load_training, load_features
-from data_processing.utils import vcol    
+from data_processing.utils import vcol
+import numpy
 
 # Compute mean, min and max value of each feature
 def compute_analytics(features, samples):
@@ -13,11 +11,12 @@ def compute_analytics(features, samples):
         mean_value = samples[i].mean()
         min_value = samples[i].min()
         max_value = samples[i].max()
-        print("{} \t│ {:.2f}  \t│ {:.2f}  \t│ {:.2f}".format(feature_name, mean_value, min_value, max_value))
+        print("{} \t│ {:.2f}  \t│ {:.2f}  \t│ {:.2f}".format(
+            feature_name, mean_value, min_value, max_value))
 
 
 def pearson_correlation(samples):
-    return numpy.corrcoef(samples)
+    return numpy.absolute(numpy.corrcoef(samples))
 
 # Compute empirical mean
 def empirical_mean(array):
@@ -56,10 +55,24 @@ def pdf(X, mu, C):
     return numpy.exp(logpdf_GAU_ND(X, mu, C))
 
 
+def z_normalization(features):
+    z_scores = numpy.array(
+        [(feature - feature.mean()) / st_dev(feature) for feature in features])
+    return z_scores
+
+
+def st_dev(samples):
+    mu = samples.mean()
+    differences = [(value - mu)**2 for value in samples]
+    sum_of_differences = sum(differences)
+    standard_deviation = (sum_of_differences / (len(samples) - 1)) ** 0.5
+    return standard_deviation
+
+
 if __name__ == '__main__':
 
     # Load data from file
     samples, labels = load_training()
     features = load_features()
-    
+
     compute_analytics(features, samples)

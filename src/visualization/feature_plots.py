@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
-import sys
-sys.path.append("./")
 from data_processing.data_load import load_training, load_features
-from data_processing.analytics import pearson_correlation
+from data_processing.analytics import pearson_correlation, z_normalization
 from data_processing.dimensionality_reduction import pca
 
 # Plot histogram for all features
@@ -56,7 +54,12 @@ def plot_feature_pairs_sctterplots(features, samples, labels):
 
 def plot_correlation_heatmap(samples):
     pearson_matrix = pearson_correlation(samples)
-    plt.imshow(pearson_matrix, cmap='gist_yarg', vmin=-1, vmax=1)
+    plt.imshow(pearson_matrix, cmap='gist_yarg', vmin=0, vmax=1)
+    # Add correlation value on each square of the heatmap
+    for x in range(len(pearson_matrix)):
+        for y in range(len(pearson_matrix[x])):
+            cor_color = 'w' if pearson_matrix[x][y] > 0.5 else 'k'
+            plt.text(x, y, '%.2f' % pearson_matrix[x][y], color=cor_color, ha='center', va='center')
     plt.show()
     
 
@@ -67,9 +70,16 @@ if __name__ == '__main__':
     samples, labels = load_training()
     features = load_features()
     
+    z_normalized_samples = z_normalization(samples)
     pca_samples = pca(samples, 4, labels)
     
+    # Correlation heatmaps
     plot_correlation_heatmap(samples)
     plot_correlation_heatmap(pca_samples)
-    # plot_features_histograms(features, samples, labels)
-    # plot_feature_pairs_sctterplots(features, samples, labels)
+    plot_correlation_heatmap(z_normalized_samples)
+    
+    # Plot histogram for all features
+    plot_features_histograms(features, samples, labels)
+    
+    # Scatterplots for all pairs of different features
+    plot_feature_pairs_sctterplots(features, samples, labels)

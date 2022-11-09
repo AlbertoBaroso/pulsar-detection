@@ -1,9 +1,6 @@
 import numpy
 import scipy.optimize
-import sys
-sys.path.append("./")
 from data_processing.utils import vcol 
-from data_processing.error import error_rate 
 
 
 # LOGISTIC REGRESSION
@@ -35,6 +32,8 @@ def train_logistic_regression_model(DTR, LTR, DTE, λ):
 
     # numerical solver to minimize the logreg_obj function
     x, f, d = scipy.optimize.fmin_l_bfgs_b(func=logreg_obj, iprint=1, x0=numpy.zeros(DTR.shape[0] + 1), args=(DTR, LTR, λ), approx_grad=True)
+    # x is the estimated position of the minimum
+    # f is the objective value at the minimum
 
     # Compute scores as posterior log-likelihood ratios:
     w = x[0:DTR.shape[0]]

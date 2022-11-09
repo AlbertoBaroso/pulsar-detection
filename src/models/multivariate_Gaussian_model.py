@@ -1,6 +1,4 @@
 import numpy
-import sys
-sys.path.append("./")
 from data_processing.utils import vrow, vcol
 from data_processing.analytics import empirical_mean, covariance_matrix
 from scipy import special

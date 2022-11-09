@@ -1,9 +1,7 @@
-import numpy
-import scipy
-import sys
-sys.path.append("./")
 from data_processing.analytics import covariance_matrix
 from data_processing.utils import vcol
+import scipy
+import numpy
 
 
 def lda(D, L, m):
@@ -128,4 +126,4 @@ def pca(D, m, labels):
     # plt.legend()
     # plt.show()
 
-    return numpy.dot(directions, projected_data)
+    return projected_data

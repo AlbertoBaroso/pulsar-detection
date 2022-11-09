@@ -1,5 +1,3 @@
-import sys
-sys.path.append("./")
 from data_processing.utils import one_dimensional_array
 
 

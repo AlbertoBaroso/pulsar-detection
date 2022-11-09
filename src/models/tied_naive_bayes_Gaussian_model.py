@@ -1,7 +1,5 @@
 import numpy
 import scipy
-import sys
-sys.path.append("./")
 from data_processing.utils import vrow, vcol
 from data_processing.analytics import empirical_mean, covariance_matrix, logpdf_GAU_ND, pdf
 
