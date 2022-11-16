@@ -79,7 +79,6 @@ def within_class_covariance_matrix(D: numpy.ndarray, labels: numpy.ndarray, clas
     return SW / N
 
 
-# compute the log-densities for samples X
 def logpdf_GAU_ND(X: numpy.ndarray, mu: numpy.ndarray, C: numpy.ndarray) -> numpy.ndarray:
     """ 
         Compute the log-density of a multivariate Gaussian distribution for all samples

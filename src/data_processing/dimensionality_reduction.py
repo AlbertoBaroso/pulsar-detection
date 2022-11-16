@@ -3,37 +3,42 @@ from data_processing.utils import vcol
 import scipy
 import numpy
 
+def most_discriminant_egienvectors(C: numpy.ndarray, m: int) -> numpy.ndarray:
+    """
+        Compute the most discriminant eigenvectors given a covariance matrix C
+        
+        Parameters
+        ----------            
+        C (numpy.ndarray): covariance matrix
+        m (int): number of dimensions to reduce to
+        
+        Returns
+        -------
+        The m most discriminant eigenvectors of C
+    """
+
+    _s, U = numpy.linalg.eigh(C)
+    # _s: eigenvalues sorted from smallest to largest
+    # U: eigenvectors (columns of U)
+    P = U[:, ::-1][:, 0:m] # Retrieve only the m principal directions
+
+    return P
+    
 
 def lda(D, L, m):
-
-    def most_discriminant_egienvectors(C, m):
-        # Compute eigenvectors
-        s, U = numpy.linalg.eigh(C)
-        # s: eigenvalues sorted from smallest to largest
-        # U: eigenvectors (columns of U)
-
-        P = U[:, ::-1][:, 0:m]
-
-        # Since the covariance matrix is semi-definite positive,
-        # We can also get the sorted eigenvectors from the Singular Value Decomposition
-        U2, s2, Vh = numpy.linalg.svd(C)
-        # In this case, the singular values (which are equal to the eigenvalues) are sorted in descending order,
-        # the columns of U are the corresponding eigenvectors
-        P2 = U[:, 0:m]
-        return P
-
 
     pulsar = D[:, L == 0]
     non_pulsar = D[:, L == 1]
 
-    # Compute covariance matrix
+    # Compute covariance matrices
     C_pulsar = covariance_matrix(pulsar)
     C_non_pulsar = covariance_matrix(non_pulsar)
 
     n_samples_pulsar = pulsar.shape[1]
     n_samples_non_pulsar = non_pulsar.shape[1]
     N = n_samples_pulsar + n_samples_non_pulsar
-    SW = ((C_pulsar * n_samples_pulsar) + (C_non_pulsar * n_samples_non_pulsar)) / N
+    SW = ((C_pulsar * n_samples_pulsar) +
+          (C_non_pulsar * n_samples_non_pulsar)) / N
 
     # mu is the global mean of the dataset
     mu = D.mean(1)
@@ -41,7 +46,6 @@ def lda(D, L, m):
     mu_non_pulsar = vcol(non_pulsar.mean(axis=1) - mu)
     SB = ((n_samples_pulsar * numpy.dot(mu_pulsar, mu_pulsar.T)) +
           (n_samples_non_pulsar * numpy.dot(mu_non_pulsar, mu_non_pulsar.T))) / N
-
 
     ### SOLVE THE GENERALIZED EIGENVALUE PROBLEM ###
     # m: at most n_of_classes - 1 discriminant directions
@@ -72,7 +76,7 @@ def lda(D, L, m):
     # Transform from the original space to the LDA subspace
     W = numpy.dot(P1.T, P2)  # LDA matrix
     # y = numpy.dot(P2.T, P1, x)
-    Y = numpy.dot(W.T, D) # the solution is not orthogonal
+    Y = numpy.dot(W.T, D)  # the solution is not orthogonal
 
     # Scatterplot
     # pulsar = Y[:, L == 1]
@@ -86,20 +90,19 @@ def lda(D, L, m):
     return Y
 
 
-def pca(D, m, labels):
+def pca(D: numpy.ndarray, m: int) -> numpy.ndarray:
+    """ 
+        Principal Component Analysis (PCA) 
 
-    # @param C: covariance matrix
-    # @param m: number of dimensions to reduce to
-    def pca_projection_matrix(C, m):
-        # Compute eigenvectors
-        s, U = numpy.linalg.eigh(C)
-        # s: eigenvalues sorted from smallest to largest
-        # U: eigenvectors (columns of U)
-
-        # Reverse the order of eigenvectors (Numpy returns them in ascending order)
-        P = U[:, ::-1][:, 0:m] # Retrieve only the m principal directions
-        return P
-
+        Parameters
+        ----------
+        D (numpy.ndarray): data matrix
+        m (int): number of dimensions to reduce to
+    
+        Returns
+        -------
+        (numpy.ndarray): the m directions over which data has most variance
+    """
 
     # Compute means for each column of the matrix
     mu = D.mean(axis=1)
@@ -112,10 +115,10 @@ def pca(D, m, labels):
 
     # Retrieve The m leading eigenvectors from U (Principal components)
     # (We reverse the order of the columns of U so that the leading eigenvectors are in the first m columns):
-    directions = pca_projection_matrix(C, m)
+    directions = most_discriminant_egienvectors(C, m)
 
     projected_data = numpy.dot(directions.T, D)
-    
+
     # import matplotlib.pyplot as plt
     # pulsar = projected_data[:, labels == 1]
     # non_pulsar = projected_data[:, labels == 0]
