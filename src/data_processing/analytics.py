@@ -4,7 +4,7 @@ import numpy
 
 
 def compute_analytics(features, samples):
-    """Compute and print: mean, min and max value of each feature"""
+    """ Compute and print: mean, min and max value of each feature """
     print("Feature \t\t\t\t\t│  Mean \t│  Min \t\t│  Max")
     print("─" * 90)
     for i, feature in enumerate(features):
@@ -16,17 +16,17 @@ def compute_analytics(features, samples):
 
 
 def pearson_correlation(samples):
-    """Compute the Pearson correlation coefficient between each pair of features"""
+    """ Compute the Pearson correlation coefficient between each pair of features """
     return numpy.absolute(numpy.corrcoef(samples))
 
 
 def empirical_mean(array: numpy.ndarray) -> numpy.ndarray:
-    """Compute the empirical mean of a dataset"""
+    """ Compute the empirical mean of a dataset """
     return vcol(array.mean(1))
 
 
 def covariance_matrix(D: numpy.ndarray) -> numpy.ndarray:
-    """Compute the covariance matrix for a dataset"""
+    """ Compute the covariance matrix for a dataset """
     # Compute mean foreach column (feature)
     mu = empirical_mean(D)
     # Compute the 0-mean matrix (centered data)
@@ -40,11 +40,13 @@ def between_class_covariance_matrix(D: numpy.ndarray, labels: numpy.ndarray, cla
     """
     Compute the between-class covariance matrix of a dataset D
 
-    Parameters
-    ----------
-    D: The entire dataset
-    labels: Labels of each sample
-    classes: List of all distinct labels
+    Args:
+        D (numpy.ndarray): The entire dataset
+        labels (numpy.ndarray): Labels of each sample
+        classes (numpy.ndarray): List of all distinct labels
+        
+    Returns:
+        numpy.ndarray: The between-class covariance matrix
     """
     mu = D.mean(axis=1)  # Dataset mean
     N = float(D.shape[1])  # Number of samples
@@ -63,11 +65,13 @@ def within_class_covariance_matrix(D: numpy.ndarray, labels: numpy.ndarray, clas
     """
     Compute the between-class covariance matrix of a dataset D
 
-    Parameters
-    ----------
-    D: The entire dataset
-    labels: Labels of each sample
-    classes: List of all distinct labels
+    Args:
+        D (numpy.ndarray): The entire dataset
+        labels (numpy.ndarray): Labels of each sample
+        classes (numpy.ndarray): List of all distinct labels
+        
+    Returns:
+        numpy.ndarray: The within-class covariance matrix
     """
     N = float(D.shape[1])  # Number of samples
     SW = 0
@@ -82,15 +86,13 @@ def logpdf_GAU_ND(X: numpy.ndarray, mu: numpy.ndarray, C: numpy.ndarray) -> nump
     """
     Compute the log-density of a multivariate Gaussian distribution for all samples
 
-    Parameters
-    ----------
-    X (numpy.ndarray):  Original dataset, of shape (n, m) where n is the number of features and m is the number of samples
-    mu (numpy.ndarray): Mean of the MVG distribution, it has shape (n, 1)
-    C (numpy.ndarray):  Covariance matrix of the MVG distribution, it has shape (n, n)
+    Args:
+        X (numpy.ndarray):  Original dataset, of shape (n, m) where n is the number of features and m is the number of samples
+        mu (numpy.ndarray): Mean of the MVG distribution, it has shape (n, 1)
+        C (numpy.ndarray):  Covariance matrix of the MVG distribution, it has shape (n, n)
 
-    Returns
-    -------
-    numpy.ndarray: the log-density of the MVG distribution computed for each sample, it has shape (m, 1)
+    Returns:
+        numpy.ndarray: the log-density of the MVG distribution computed for each sample, it has shape (m, 1)
     """
     covariance_inverse = numpy.linalg.inv(C)
     M = X.shape[0]
@@ -110,13 +112,13 @@ def logpdf_GAU_ND(X: numpy.ndarray, mu: numpy.ndarray, C: numpy.ndarray) -> nump
 
 
 def z_normalization(features) -> numpy.ndarray:
-    """Compute the z-normalization of a set of features"""
+    """ Compute the z-normalization of a set of features """
     z_scores = numpy.array([(feature - feature.mean()) / st_dev(feature) for feature in features])
     return z_scores
 
 
 def st_dev(samples: numpy.ndarray) -> float:
-    """Compute the standard deviation of a set of samples"""
+    """ Compute the standard deviation of a set of samples """
     mu = samples.mean()
     differences = [(value - mu) ** 2 for value in samples]
     sum_of_differences = sum(differences)

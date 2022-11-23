@@ -3,20 +3,18 @@ import numpy
 
 
 def error_rate(predicted: numpy.ndarray, expected: numpy.ndarray) -> float:
-    """ 
-        Compute the error rate of a prediction as (#correctly_predicted / #total_samples) 
+    """
+    Compute the error rate of a prediction as (#correctly_predicted / #total_samples)
 
-        Parameters
-        ----------
+    Args:
         predicted (numpy.ndarray): The predicted labels
         expected (numpy.ndarray): The expected labels
-        
-        Returns
-        -------
+
+    Returns:
         (float): The error rate
     """
-    
-    correct = sum(one_dimensional_array(predicted) == one_dimensional_array(expected))
-    accuracy = correct / expected.shape[1]
+    expected_1d = one_dimensional_array(expected)
+    correct = sum(one_dimensional_array(predicted) == expected_1d)
+    accuracy = correct / len(expected_1d)
     error = 1 - accuracy
-    return error / float(len(predicted))
+    return error

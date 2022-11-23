@@ -34,22 +34,22 @@ def rank_samples(feature: numpy.ndarray, training_samples: Optional[numpy.ndarra
 
 
 def rank_percentile(rank: list[float]) -> numpy.ndarray:
-    """Compute percentile (percent poin function) of the rank"""
+    """ Compute percentile (percent poin function) of the rank """
     return norm.ppf(rank)
 
 
 def gaussianize_feature(feature, training_samples=None) -> numpy.ndarray:
-    """Transform a feature into a gaussian distribution"""
+    """ Transform a feature into a gaussian distribution """
     return numpy.array(rank_percentile(rank_samples(feature, training_samples)))
 
 
 def gaussianize_training_samples(DTR: numpy.ndarray) -> numpy.ndarray:
-    """Transform each feature of the training samples into a gaussian distribution"""
+    """ Transform each feature of the training samples into a gaussian distribution """
     return numpy.array([gaussianize_feature(x) for x in DTR])
 
 
 def gaussianize_test_samples(DTE: numpy.ndarray, DTR: numpy.ndarray) -> numpy.ndarray:
-    """Compute gaussianization by raking test samples against training samples"""
+    """ Compute gaussianization by raking test samples against training samples """
     result = []
     for i in range(len(DTE)):
         result.append(gaussianize_feature(DTE[i], DTR[i]))
