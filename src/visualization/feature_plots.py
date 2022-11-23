@@ -7,13 +7,15 @@ import numpy
 
 def plot_features_histograms(features: list[str], samples: numpy.ndarray, labels: numpy.ndarray) -> None:
     """
-        Plot histogram for all features
+    Plot histogram for all features
 
-        Parameters
-        ----------
+    Args:
         features (list[str]): array of features names
         samples (numpy.ndarray): array of samples
         labels (numpy.ndarray): array of numerical labels
+
+    Returns:
+        None
     """
 
     # Get samples by class
@@ -22,8 +24,7 @@ def plot_features_histograms(features: list[str], samples: numpy.ndarray, labels
 
     # Plot histogram
     for i in range(len(features)):
-        plt.hist(non_pulsars[i], bins=20, density=True,
-                 label="Non pulsars", alpha=0.4)
+        plt.hist(non_pulsars[i], bins=20, density=True, label="Non pulsars", alpha=0.4)
         plt.hist(pulsars[i], bins=20, density=True, label="Pulsars", alpha=0.4)
         plt.xlabel(features[i])
         plt.legend()
@@ -32,13 +33,15 @@ def plot_features_histograms(features: list[str], samples: numpy.ndarray, labels
 
 def plot_feature_histogram(feature: str, samples: numpy.ndarray, labels: numpy.ndarray) -> None:
     """
-        Plot histogram for only one feature
+    Plot histogram for only one feature
 
-        Parameters
-        ----------
+    Args:
         features (str): features name
         samples (numpy.ndarray): array of samples
         labels (numpy.ndarray): array of numerical labels
+
+    Returns:
+        None
     """
 
     # Get samples by class
@@ -46,8 +49,7 @@ def plot_feature_histogram(feature: str, samples: numpy.ndarray, labels: numpy.n
     pulsars = samples[labels == 1]
 
     # Plot histogram
-    plt.hist(non_pulsars, bins=50, density=True,
-             label="Non pulsars", alpha=0.4)
+    plt.hist(non_pulsars, bins=50, density=True, label="Non pulsars", alpha=0.4)
     plt.hist(pulsars, bins=50, density=True, label="Pulsars", alpha=0.4)
     plt.xlabel(feature)
     plt.legend()
@@ -56,13 +58,15 @@ def plot_feature_histogram(feature: str, samples: numpy.ndarray, labels: numpy.n
 
 def plot_feature_pairs_sctterplots(features: list[str], samples: numpy.ndarray, labels: numpy.ndarray) -> None:
     """
-        Plot scatterplot for each pair of features
+    Plot scatterplot for each pair of features
 
-        Parameters
-        ----------
+    Args:
         features (list[str]): array of features names
         samples (numpy.ndarray): array of samples
         labels (numpy.ndarray): array of numerical labels
+
+    Returns:
+        None
     """
 
     # Get samples by class
@@ -74,10 +78,8 @@ def plot_feature_pairs_sctterplots(features: list[str], samples: numpy.ndarray, 
         for j in range(len(features)):
             if i != j:
 
-                plt.plot(non_pulsars[i], non_pulsars[j], linestyle='',
-                         marker='.', markersize=10, label="Non pulsars")
-                plt.plot(pulsars[i], pulsars[j], linestyle='',
-                         marker='.', markersize=10, label="Pulsars")
+                plt.plot(non_pulsars[i], non_pulsars[j], linestyle="", marker=".", markersize=10, label="Non pulsars")
+                plt.plot(pulsars[i], pulsars[j], linestyle="", marker=".", markersize=10, label="Pulsars")
                 plt.xlabel(features[i])
                 plt.ylabel(features[j])
 
@@ -87,25 +89,26 @@ def plot_feature_pairs_sctterplots(features: list[str], samples: numpy.ndarray, 
 
 def plot_correlation_heatmap(samples: numpy.ndarray) -> None:
     """
-        Plot heatmap of pearson correlation between features
+    Plot heatmap of pearson correlation between features
 
-        Parameters
-        ----------
+    Args:
         samples (numpy.ndarray): array of samples
+
+    Returns:
+        None
     """
-    
+
     pearson_matrix = pearson_correlation(samples)
-    plt.imshow(pearson_matrix, cmap='gist_yarg', vmin=0, vmax=1)
+    plt.imshow(pearson_matrix, cmap="gist_yarg", vmin=0, vmax=1)
     # Add correlation value on each square of the heatmap
     for x in range(len(pearson_matrix)):
         for y in range(len(pearson_matrix[x])):
-            cor_color = 'w' if pearson_matrix[x][y] > 0.5 else 'k'
-            plt.text(
-                x, y, '%.2f' % pearson_matrix[x][y], color=cor_color, ha='center', va='center')
+            cor_color = "w" if pearson_matrix[x][y] > 0.5 else "k"
+            plt.text(x, y, "%.2f" % pearson_matrix[x][y], color=cor_color, ha="center", va="center")
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Load data from file
     samples, labels = load_training()

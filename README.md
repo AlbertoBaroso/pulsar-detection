@@ -6,7 +6,7 @@ The goal of this project is to employ data preprocessing techniques and machine 
 
 - Logistic Regression
 - Multivariate Gaussian Classifier
-- Tied Covariange Gaussian Classifier
+- Tied Covariance Gaussian Classifier
 - Naive Bayes Classifier
 - Tied Naive Bayes Classifier
 

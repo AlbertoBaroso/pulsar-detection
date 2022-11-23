@@ -10,7 +10,7 @@ def vrow(array: numpy.ndarray) -> numpy.ndarray:
     return array.reshape((1, array.size))
 
 
-def one_dimensional_array(array):
+def one_dimensional_array(array: numpy.ndarray) -> numpy.ndarray:
     return array.reshape((array.size,))
 
 

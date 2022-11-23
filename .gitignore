@@ -169,3 +169,5 @@ desktop.ini
 *.fdb_latexmk
 *.bbl
 *.blg
+
+data/processed/*
