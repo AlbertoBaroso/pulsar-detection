@@ -1,5 +1,3 @@
-from data_processing.data_load import load_training, load_features, load_test
-from visualization.feature_plots import plot_feature_histogram
 from scipy.stats import norm
 from typing import Optional
 import numpy
@@ -7,6 +5,7 @@ import numpy
 
 ### GAUSSIANIZATION ###
 
+import math
 
 def rank_samples(feature: numpy.ndarray, training_samples: Optional[numpy.ndarray]) -> list[float]:
     """
@@ -27,14 +26,14 @@ def rank_samples(feature: numpy.ndarray, training_samples: Optional[numpy.ndarra
         for x_i in comparison_feature:  # x_i is the value of the considered feature for the i-th training sample
             if x_i < x:
                 less_than_x += 1
-        rank = (less_than_x + 1) / (feature.shape[0] + 2)
+        rank = (less_than_x + 1) / (comparison_feature.shape[0] + 2)
         # +2 because we assume the existance of a feature smaller than all the others and a feature larger than all the others)
         ranks.append(rank)
     return ranks
 
 
 def rank_percentile(rank: list[float]) -> numpy.ndarray:
-    """ Compute percentile (percent poin function) of the rank """
+    """ Compute percentile (percent point function) of the rank """
     return norm.ppf(rank)
 
 
@@ -45,27 +44,13 @@ def gaussianize_feature(feature, training_samples=None) -> numpy.ndarray:
 
 def gaussianize_training_samples(DTR: numpy.ndarray) -> numpy.ndarray:
     """ Transform each feature of the training samples into a gaussian distribution """
-    return numpy.array([gaussianize_feature(x) for x in DTR])
+    return numpy.array([gaussianize_feature(feature) for feature in DTR])
 
 
 def gaussianize_test_samples(DTE: numpy.ndarray, DTR: numpy.ndarray) -> numpy.ndarray:
-    """ Compute gaussianization by raking test samples against training samples """
+    """ Compute gaussianization by ranking test samples against training samples """
     result = []
     for i in range(len(DTE)):
-        result.append(gaussianize_feature(DTE[i], DTR[i]))
+        gaussianized_feature = gaussianize_feature(DTE[i], DTR[i])
+        result.append(gaussianized_feature)
     return numpy.vstack(result)
-
-
-if __name__ == "__main__":
-
-    features = load_features()
-    training_samples, training_labels = load_training()
-    test_samples, test_labels = load_test()
-
-    # GAUSSIANIZATION OF SAMPLES #
-    gaussianized_training_samples = gaussianize_training_samples(training_samples)
-    gaussianized_test_samples = gaussianize_test_samples(test_samples, training_samples)
-
-    for i in range(len(features)):
-        plot_feature_histogram(features[i], gaussianized_training_samples[i], training_labels)
-        plot_feature_histogram(features[i], gaussianized_test_samples[i], test_labels)

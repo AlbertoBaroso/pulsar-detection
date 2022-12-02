@@ -1,146 +1,63 @@
-from data_processing.gaussianization import gaussianize_test_samples, gaussianize_training_samples
-from data_processing.data_load import load_training, load_test
-from data_processing.dimensionality_reduction import lda, pca
-from data_processing.analytics import z_normalization
-from data_processing.utils import split_80_20
-from os.path import exists
-import numpy
-
-from models.train import train_mvg_models, train_log_reg_model
-
-
-def preprocessing(training_samples, training_labels, test_samples, test_labels):
-
-    # Cached data files #
-    preprocessing_folder = "../data/processed/"
-    z_normalized_training_file = preprocessing_folder + "z_normalized_training.npy"
-    z_normalized_test_file = preprocessing_folder + "z_normalized_test.npy"
-    gaussianized_training_file = preprocessing_folder + "gaussianized_training.npy"
-    gaussianized_test_file = preprocessing_folder + "gaussianized_test.npy"
-    pca_training_file = preprocessing_folder + "pca_training.npy"
-    pca_test_file = preprocessing_folder + "pca_test.npy"
-    lda_training_file = preprocessing_folder + "lda_training.npy"
-    lda_test_file = preprocessing_folder + "lda_test.npy"
-
-    # If pre-processed data exists, load it from file
-    # Otherwise, process the data and save it to file
-
-    # Gaussianized features
-    if exists(gaussianized_training_file) and exists(gaussianized_test_file):
-        gaussianized_training_samples = numpy.load(gaussianized_training_file)
-        gaussianized_test_samples = numpy.load(gaussianized_test_file)
-    else:
-        gaussianized_training_samples = gaussianize_training_samples(training_samples)
-        numpy.save(gaussianized_training_file, gaussianized_training_samples)
-        gaussianized_test_samples = gaussianize_test_samples(test_samples, training_samples)
-        numpy.save(gaussianized_test_file, gaussianized_test_samples)
-
-    # Z-normalized features
-    if exists(z_normalized_training_file) and exists(z_normalized_test_file):
-        z_normalized_training_samples = numpy.load(z_normalized_training_file)
-        z_normalized_test_samples = numpy.load(z_normalized_test_file)
-    else:
-        z_normalized_training_samples = z_normalization(training_samples)
-        numpy.save(z_normalized_training_file, z_normalized_training_samples)
-        z_normalized_test_samples = z_normalization(test_samples)
-        numpy.save(z_normalized_test_file, z_normalized_test_samples)
-
-    # Principal Component Analysis
-    if exists(pca_training_file) and exists(pca_test_file):
-        pca_training_samples = numpy.load(pca_training_file)
-        pca_test_samples = numpy.load(pca_test_file)
-    else:
-        pca_training_samples = pca(training_samples, 4)
-        numpy.save(pca_training_file, pca_training_samples)
-        pca_test_samples = pca(test_samples, 4)
-        numpy.save(pca_test_file, pca_test_samples)
-
-    # Linear Discriminant Analysis
-    if exists(lda_training_file) and exists(lda_test_file):
-        lda_training_samples = numpy.load(lda_training_file)
-        lda_test_samples = numpy.load(lda_test_file)
-    else:
-        lda_training_samples = lda(training_samples, training_labels, 1)
-        numpy.save(lda_training_file, lda_training_samples)
-        lda_test_samples = lda(test_samples, test_labels, 1)
-        numpy.save(lda_test_file, lda_test_samples)
-
-    return (
-        gaussianized_training_samples,
-        gaussianized_test_samples,
-        pca_training_samples,
-        pca_test_samples,
-        lda_training_samples,
-        lda_test_samples,
-        z_normalized_training_samples,
-        z_normalized_test_samples,
-    )
-
+from data_processing.data_load import load_training, load_test, load_preprocessed
+from models.train import mvg_kfold, train_log_reg_model
+from constants import K, labels, CLASS_PRIORS, LOG_REG_λ
 
 if __name__ == "__main__":
 
-    # Data load & preprocessing #
+    # Load data from file #
 
     training_samples, training_labels = load_training()
     test_samples, test_labels = load_test()
 
     # Pre-process data #
     (
-        gaussianized_training_samples,
-        gaussianized_test_samples,
-        pca_training_samples,
-        pca_test_samples,
-        lda_training_samples,
-        lda_test_samples,
-        z_normalized_training_samples,
-        z_normalized_test_samples,
-    ) = preprocessing(training_samples, training_labels, test_samples, test_labels)
-
-    # Split 80-20 #
-    training_split_samples, training_split_labels, validation_split_samples, validation_split_labels = split_80_20(
-        training_samples, training_labels
-    )
-    pca_training_split_samples, pca_training_split_labels, pca_validation_split_samples, pca_validation_split_labels = split_80_20(
-        pca_training_samples, training_labels
-    )
-    lda_training_split_samples, lda_training_split_labels, lda_validation_split_samples, lda_validation_split_labels = split_80_20(
-        lda_training_samples, training_labels
-    )
-    (
-        gaussianized_training_split_samples,
-        gaussianized_training_split_labels,
-        gaussianized_validation_split_samples,
-        gaussianized_validation_split_labels,
-    ) = split_80_20(gaussianized_training_samples, training_labels)
+        DTR_gaussianized,
+        DTE_gaussianized,
+        DTR_pca,
+        DTE_pca,
+        DTR_lda,
+        DTE_lda,
+        DTR_kfold_raw,
+        DVAL_kfold_raw,
+        DTR_z_normalized,
+        DTE_z_normalized,
+        DTR_kfold_gaussianized,
+        DVAL_kfold_gaussianized,
+        DTR_kfold_z_normalized,
+        DVAL_kfold_z_normalized,
+        DTR_kfold_pca,
+        DVAL_kfold_pca,
+        DTR_kfold_lda,
+        DVAL_kfold_lda,
+        LTR_kfold,
+        LVAL_kfold,
+    ) = load_preprocessed(training_samples, training_labels, test_samples, test_labels)
 
     #######################
     # Logistic Regression #
     #######################
 
-    log_reg_λ_vec = [0, 0.0001, 0.01, 0.1]
     log_reg_raw_results = []
     log_reg_pca_results = []
     log_reg_lda_results = []
     log_reg_gaussianized_results = []
 
-    for λ in log_reg_λ_vec:
+    for λ in LOG_REG_λ:
 
         # Raw features #
         logisitc_regression_error = train_log_reg_model(training_samples, training_labels, test_samples, test_labels, λ)
         log_reg_raw_results.append((λ, logisitc_regression_error))
 
         # PCA #
-        logisitc_regression_error = train_log_reg_model(pca_training_samples, training_labels, pca_test_samples, test_labels, λ)
+        logisitc_regression_error = train_log_reg_model(DTR_pca, training_labels, DTE_pca, test_labels, λ)
         log_reg_pca_results.append((λ, logisitc_regression_error))
 
         # LDA #
-        logisitc_regression_error = train_log_reg_model(lda_training_samples, training_labels, lda_test_samples, test_labels, λ)
+        logisitc_regression_error = train_log_reg_model(DTR_lda, training_labels, DTE_lda, test_labels, λ)
         log_reg_lda_results.append((λ, logisitc_regression_error))
 
         # GAUSSIANIZED FEATURES #
-        logisitc_regression_error = train_log_reg_model(
-            gaussianized_training_samples, training_labels, gaussianized_test_samples, test_labels, λ
-        )
+        logisitc_regression_error = train_log_reg_model(DTR_gaussianized, training_labels, DTE_gaussianized, test_labels, λ)
         log_reg_gaussianized_results.append((λ, logisitc_regression_error))
 
     print("\n" * 5)
@@ -158,53 +75,34 @@ if __name__ == "__main__":
     # MVG MODELS #
     ##############
 
-    class_priors_vec = [[0.5, 0.5], [0.2, 0.8], [0.8, 0.2]]
-    for class_priors in class_priors_vec:
+    for class_priors in CLASS_PRIORS:
 
-        # Raw features #
-
-        mvg_error, naive_bayes_error, mvg_tied_cov_error, tied_naive_bayes_error = train_mvg_models(
-            training_split_samples, training_split_labels, validation_split_samples, validation_split_labels, class_priors
-        )
-
-        print("# MVG ERROR RATES, priors: {} #".format(class_priors))
-        print("Multivariate Gaussian Model: ", mvg_error)
-        print("Naive bayes Model: ", naive_bayes_error)
-        print("Tied covariance Model: ", mvg_tied_cov_error)
-        print("Tied naive bayes Model: ", tied_naive_bayes_error)
+        # RAW FEATURES #
+        validated_mvg_models = mvg_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, training_labels, class_priors, labels)
+        print("# RAW Features - Priors: {} #".format(class_priors))
+        for model_type, model_error_rate in validated_mvg_models.items():
+            print("{}: {}".format(model_type, model_error_rate))
 
         # LDA #
-
-        mvg_error, naive_bayes_error, mvg_tied_cov_error, tied_naive_bayes_error = train_mvg_models(
-            lda_training_split_samples, training_split_labels, lda_validation_split_samples, validation_split_labels, class_priors
-        )
-
-        print("# LDA ERROR RATES, priors: {} #".format(class_priors))
-        print("Multivariate Gaussian Model: ", mvg_error)
-        print("Naive bayes Model: ", naive_bayes_error)
-        print("Tied covariance Model: ", mvg_tied_cov_error)
-        print("Tied naive bayes Model: ", tied_naive_bayes_error)
+        validated_mvg_models = mvg_kfold(DTR_kfold_lda, LTR_kfold, DVAL_kfold_lda, training_labels, class_priors, labels)
+        print("# LDA Features - Priors: {} #".format(class_priors))
+        for model_type, model_error_rate in validated_mvg_models.items():
+            print("{}: {}".format(model_type, model_error_rate))
 
         # PCA #
-
-        mvg_error, naive_bayes_error, mvg_tied_cov_error, tied_naive_bayes_error = train_mvg_models(
-            pca_training_split_samples, training_split_labels, pca_validation_split_samples, validation_split_labels, class_priors
-        )
-
-        print("# PCA ERROR RATES, priors: {} #".format(class_priors))
-        print("Multivariate Gaussian Model: ", mvg_error)
-        print("Naive bayes Model: ", naive_bayes_error)
-        print("Tied covariance Model: ", mvg_tied_cov_error)
-        print("Tied naive bayes Model: ", tied_naive_bayes_error)
+        validated_mvg_models = mvg_kfold(DTR_kfold_pca, LTR_kfold, DVAL_kfold_pca, training_labels, class_priors, labels)
+        print("# PCA Features - Priors: {} #".format(class_priors))
+        for model_type, model_error_rate in validated_mvg_models.items():
+            print("{}: {}".format(model_type, model_error_rate))
 
         # GAUSSIANIZED FEATURES #
+        validated_mvg_models = mvg_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, training_labels, class_priors, labels)
+        print("# GAUSSIANIZED Features - Priors: {} #".format(class_priors))
+        for model_type, model_error_rate in validated_mvg_models.items():
+            print("{}: {}".format(model_type, model_error_rate))
 
-        mvg_error, naive_bayes_error, mvg_tied_cov_error, tied_naive_bayes_error = train_mvg_models(
-            gaussianized_training_split_samples, training_split_labels, gaussianized_validation_split_samples, validation_split_labels, class_priors
-        )
-
-        print("# GAUSSIANIZED FEATURES ERROR RATES, priors: {} #".format(class_priors))
-        print("Multivariate Gaussian Model: ", mvg_error)
-        print("Naive bayes Model: ", naive_bayes_error)
-        print("Tied covariance Model: ", mvg_tied_cov_error)
-        print("Tied naive bayes Model: ", tied_naive_bayes_error)
+        # Z-NORMALIZED FEATURES #
+        validated_mvg_models = mvg_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, training_labels, class_priors, labels)
+        print("# Z-NORMALIZED Features - Priors: {} #".format(class_priors))
+        for model_type, model_error_rate in validated_mvg_models.items():
+            print("{}: {}".format(model_type, model_error_rate))

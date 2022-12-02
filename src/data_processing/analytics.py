@@ -1,4 +1,3 @@
-from data_processing.data_load import load_training, load_features
 from data_processing.utils import vcol
 import numpy
 
@@ -111,10 +110,14 @@ def logpdf_GAU_ND(X: numpy.ndarray, mu: numpy.ndarray, C: numpy.ndarray) -> nump
     return Y.ravel()
 
 
-def z_normalization(features) -> numpy.ndarray:
+def z_normalization(features: numpy.ndarray, comparison_features: numpy.ndarray = None) -> numpy.ndarray:
     """ Compute the z-normalization of a set of features """
-    z_scores = numpy.array([(feature - feature.mean()) / st_dev(feature) for feature in features])
-    return z_scores
+    z_scores = []
+    for i, feature in enumerate(features):
+        mean = feature.mean() if comparison_features is None else comparison_features[i].mean()
+        standard_deviation = st_dev(feature) if comparison_features is None else st_dev(comparison_features[i])
+        z_scores.append((feature - mean) / standard_deviation)
+    return numpy.array(z_scores)
 
 
 def st_dev(samples: numpy.ndarray) -> float:
@@ -124,12 +127,3 @@ def st_dev(samples: numpy.ndarray) -> float:
     sum_of_differences = sum(differences)
     standard_deviation = (sum_of_differences / (len(samples) - 1)) ** 0.5
     return standard_deviation
-
-
-if __name__ == "__main__":
-
-    # Load data from file
-    samples, labels = load_training()
-    features = load_features()
-
-    compute_analytics(features, samples)

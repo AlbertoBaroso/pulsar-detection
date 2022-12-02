@@ -1,6 +1,8 @@
 from data_processing.data_load import load_training, load_features
 from data_processing.analytics import pearson_correlation, z_normalization
 from data_processing.dimensionality_reduction import pca
+from data_processing.utils import project_data
+from constants import PCA_COMPONENTS
 import matplotlib.pyplot as plt
 import numpy
 
@@ -115,7 +117,8 @@ if __name__ == "__main__":
     features = load_features()
 
     z_normalized_samples = z_normalization(samples)
-    pca_samples = pca(samples, 4)
+    pca_projection_matrix = pca(samples, PCA_COMPONENTS)
+    pca_samples = project_data(samples, pca_projection_matrix)
 
     # Correlation heatmaps
     plot_correlation_heatmap(samples)
