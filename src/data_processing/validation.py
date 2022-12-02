@@ -2,7 +2,7 @@ import numpy
 
 def kfold(DTR: numpy.ndarray, LTR: numpy.ndarray, k: int):
     """
-    K-Fold cross validation: partition the dataset in k folds
+    Partition the dataset in k folds, at each iteration one fold is used as validation set and the others as training set
 
     Args:
         DTR (numpy.ndarray):    Training data

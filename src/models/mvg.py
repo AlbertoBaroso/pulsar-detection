@@ -177,6 +177,7 @@ class MVG:
         self.type = type
         self.is_tied = type == MVGModel.TIED or type == MVGModel.TIED_NAIVE
 
+        # Train the model
         if type == MVGModel.MVG:
             µ, Σ = self.train_multivariate_gaussian()
         elif type == MVGModel.NAIVE:

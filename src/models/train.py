@@ -1,5 +1,4 @@
-from models.logistic_regression_model import train_logistic_regression_model
-from data_processing.validation import kfold
+from models.logistic_regression import LogisticRegression
 from data_processing.error import error_rate
 from models.mvg import MVG, MVGModel
 import numpy
@@ -66,8 +65,10 @@ def mvg_kfold(
     for model_type in MVGModel:
 
         fold_scores = numpy.hstack(scores[model_type])
+        
         # Predict labels
         predictions = MVG.predict_samples(fold_scores)
+        
         # Compute error rates
         error_rates[model_type] = error_rate(predictions, validation_labels)
 
@@ -77,13 +78,12 @@ def mvg_kfold(
 def train_log_reg_model(training_samples, training_labels, test_samples, test_labels, λ):
 
     # Train models & Predict labels
-    predictions_logisitc_regression = train_logistic_regression_model(training_samples, training_labels, test_samples, λ)
-
-    predictions_logisitc_regression = numpy.array([predictions_logisitc_regression])
-
-    test_labels = numpy.array([test_labels])
+    model = LogisticRegression(training_samples, training_labels, λ)
+    
+    # Predict labels
+    predictions = model.predict_samples(test_samples)
 
     # Compute error rates
-    logisitc_regression_error = error_rate(predictions_logisitc_regression, test_labels)
+    logisitc_regression_error = error_rate(predictions, test_labels)
 
     return logisitc_regression_error
