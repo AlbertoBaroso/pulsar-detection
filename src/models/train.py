@@ -3,39 +3,52 @@ from data_processing.error import error_rate
 from models.mvg import MVG, MVGModel
 import numpy
 
+# Single Model #
 
-def train_mvg_models(DTR, LTR, DTE, LTE, class_priors):
+def train_log_reg_model(training_samples: numpy.ndarray, training_labels: numpy.ndarray, test_samples: numpy.ndarray, test_labels: numpy.ndarray, λ: float):
 
-    # MVG Models
-    models = [
-        ("MVG", MVG.train_multivariate_gaussian2, False),
-        ("Naive Bayes MVG", MVG.train_naive_bayes_mvg2, False),
-        ("Tied MVG", MVG.train_tied_covariance_mvg2, True),
-        ("Tied Naive Bayes MVG", MVG.train_tied_covariance_naive_bayes_mvg2, True),
-    ]
-    labels = sorted(set(LTR) | set(LTE))  # Get ordered list of labels [0, 1, ..]
-    error_rates = []
+    # Train models & Predict labels
+    model = LogisticRegression(training_samples, training_labels, λ)
+    
+    # Predict labels
+    predictions = model.predict_samples(test_samples)
 
-    for model_name, train_model, is_tied in models:
-        # Train models
-        µ, Σ = train_model(DTR, LTR, labels)
-        # Compute scores
-        scores = MVG.score_samples2(DTE, µ, Σ, class_priors, labels, tied=is_tied)
+    # Compute error rates
+    logisitc_regression_error = error_rate(predictions, test_labels)
+
+    return logisitc_regression_error
+
+def train_mvg_models(DTR: numpy.ndarray, LTR: numpy.ndarray, DTE: numpy.ndarray, LTE: numpy.ndarray, class_priors: list[float], labels: list[int]):
+
+    error_rates = {}
+
+    for model_type in MVGModel:
+        
+        # Train model
+        model = MVG(model_type, DTR, LTR, labels)
+        
+        # Compute scores for each class
+        model_scores = model.score_samples(DTE, class_priors)
+        
         # Predict labels
-        predictions = MVG.predict_samples(scores)
+        predictions = MVG.predict_samples(model_scores)
+        
         # Compute error rates
-        error_rates.append(error_rate(predictions, LTE))
+        error_rates[model_type] = error_rate(predictions, LTE)
 
     return error_rates
+
+
+# K-Fold Cross Validation #
 
 
 def mvg_kfold(
     training_samples: numpy.ndarray,
     training_labels: numpy.ndarray,
-    validation_samples: numpy.array,
-    validation_labels: numpy.array,
-    class_priors: list,
-    labels: list[int],
+    validation_samples: numpy.ndarray,
+    validation_labels: numpy.ndarray,
+    class_priors: list[float],
+    labels: list[int]
 ):
     """
     K-fold cross validation for MVG models
@@ -75,15 +88,41 @@ def mvg_kfold(
     return error_rates
 
 
-def train_log_reg_model(training_samples, training_labels, test_samples, test_labels, λ):
+def logistic_regression_kfold(
+    training_samples: numpy.ndarray,
+    training_labels: numpy.ndarray,
+    validation_samples: numpy.ndarray,
+    validation_labels: numpy.ndarray,
+    λ: float,
+):
+    """
+    K-fold cross validation for Logistic regression model
 
-    # Train models & Predict labels
-    model = LogisticRegression(training_samples, training_labels, λ)
-    
+    Args:
+        training_samples (numpy.ndarray):   Training dataset, of shape (K, n, m) where n is the number of features and m is the number of samples in a fold (There are K folds)
+        training_labels (numpy.ndarray):    Training labels, of shape (K, m, )
+        validation_samples (numpy.ndarray): Validation dataset, of shape (K, n, m)
+        validation_labels: (numpy.array):   Validation labels, of shape (m, )
+        λ (float):                          Regularization parameter
+    """
+
+    error_rates = {}
+    scores = []
+
+    # K-fold cross validation
+    for DTR, LTR, DVAL in zip(training_samples, training_labels, validation_samples):
+
+        # Train model
+        model = LogisticRegression(DTR, LTR, λ)
+        # Compute scores for each class
+        scores.append(model.score_samples(DVAL))
+
+    fold_scores = numpy.hstack(scores)
+        
     # Predict labels
-    predictions = model.predict_samples(test_samples)
-
+    predictions = LogisticRegression.predict_samples(fold_scores)
+    
     # Compute error rates
-    logisitc_regression_error = error_rate(predictions, test_labels)
+    error_rates = error_rate(predictions, validation_labels)
 
-    return logisitc_regression_error
+    return error_rates

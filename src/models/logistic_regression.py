@@ -6,7 +6,6 @@ import numpy
 
 
 class LogisticRegression:
-    
     def __init__(self, DTR: numpy.ndarray, LTR: numpy.ndarray, λ: float):
         """
         Args:
@@ -18,7 +17,7 @@ class LogisticRegression:
         self.DTR = DTR
         self.LTR = LTR
         self.λ = λ
-        
+
         # Train the model
         x, _f, _d = scipy.optimize.fmin_l_bfgs_b(func=self.logreg_obj, x0=numpy.zeros(DTR.shape[0] + 1), approx_grad=True)
         self.w, self.b = x[:N], x[-1]
@@ -32,7 +31,7 @@ class LogisticRegression:
         """
 
         w, b = v[:-1], v[-1]
-        
+
         # ITERATIVE VERSION
         # cross_entropy = 0
         # for i in range(N):
@@ -43,22 +42,34 @@ class LogisticRegression:
 
         # VECTORIAL VERSION
         Z = 2.0 * self.LTR - 1.0
-        S = numpy.dot(w.T, self.DTR) + b # Scores
-        cross_entropy = numpy.logaddexp(0, - S * Z)
+        S = numpy.dot(w.T, self.DTR) + b  # Scores
+        cross_entropy = numpy.logaddexp(0, -S * Z)
 
         regularization_term = (self.λ / 2) * (numpy.linalg.norm(w) ** 2)
         return regularization_term + cross_entropy.mean()
-        
-    def predict_samples(self, DTE: numpy.ndarray):
+
+    def score_samples(self, DTE: numpy.ndarray) -> numpy.ndarray:
         """
-        Predicts the labels for the given dataset.
+        Assigns a score to each sample in the dataset.
 
         Args:
             DTE (numpy.ndarray): Test data to predict
 
         Returns:
+            numpy.ndarray: Array of scores
+        """
+        return numpy.dot(self.w.T, DTE) + self.b
+
+    @staticmethod
+    def predict_samples(scores: numpy.ndarray):
+        """
+        Predicts the labels for the given scores.
+
+        Args:
+            scores (numpy.ndarray): Array of scores for each sample
+
+        Returns:
             numpy.ndarray: Predicted labels
         """
         # Compute scores as posterior log-likelihood ratios
-        scores = numpy.dot(self.w.T, DTE) + self.b
         return numpy.where(scores >= 0, 1, 0)
