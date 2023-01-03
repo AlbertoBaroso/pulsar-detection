@@ -28,3 +28,16 @@ def project_data(D: numpy.ndarray, directions: numpy.ndarray) -> numpy.ndarray:
         numpy.ndarray: Samples projected in the space spanned by the directions
     """
     return numpy.dot(directions.T, D)  # Project data
+
+def extended_data_matrix(D: numpy.ndarray, K:float=1.0):
+    """
+    Extend data matrix with a constant feature
+
+    Args:
+        D (numpy.ndarray):   Data matrix
+        K (float, optional): Constant value to add to the data matrix. Defaults to 1.0.
+
+    Returns:
+        (numpy.ndarray): Extended data matrix
+    """
+    return numpy.vstack((D, numpy.full((1, D.shape[1]), K)))
