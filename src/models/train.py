@@ -1,6 +1,6 @@
+from data_processing.comparison import error_rate, minimum_DCF
 from models.logistic_regression import LogisticRegression
 from data_processing.utils import extended_data_matrix
-from data_processing.error import error_rate
 from models.mvg import MVG, MVGModel
 from models.gmm import GMM
 from models.svm import SVM, KernelType
@@ -123,8 +123,8 @@ def mvg_kfold(
     training_labels: numpy.ndarray,
     validation_samples: numpy.ndarray,
     validation_labels: numpy.ndarray,
-    class_priors: list[float],
     labels: list[int],
+    application: tuple[float, float, float],
 ):
     """
     K-fold cross validation for MVG models
@@ -134,12 +134,13 @@ def mvg_kfold(
         training_labels (numpy.ndarray):    Training labels, of shape (K, m, )
         validation_samples (numpy.ndarray): Validation dataset, of shape (K, n, m)
         validation_labels: (numpy.array):   Validation labels, of shape (m, )
-        class_priors (numpy.ndarray):       List of prior probability of each class
         labels (list[int]):                 List of labels [0, 1, ..., k-1], where k is the number of classes
+        application (tuple):                Effective prior, Cost of false positive, Cost of false negative
     """
 
-    error_rates = {}
-    scores = {model_type: [] for model_type in MVGModel}
+    minDCF = {}
+    class_priors = [application[0], 1 - application[0]]
+    fold_scores = {model_type: [] for model_type in MVGModel}
 
     # K-fold cross validation
     for DTR, LTR, DVAL in zip(training_samples, training_labels, validation_samples):
@@ -148,20 +149,18 @@ def mvg_kfold(
             # Train model
             model = MVG(model_type, DTR, LTR, labels)
             # Compute scores for each class
-            model_scores = model.score_samples(DVAL, class_priors)
-            scores[model_type].append(model_scores)
+            model_scores = model.score_samples(DVAL, class_priors)[1]
+            fold_scores[model_type].append(model_scores)
 
     for model_type in MVGModel:
 
-        fold_scores = numpy.hstack(scores[model_type])
-
-        # Predict labels
-        predictions = MVG.predict_samples(fold_scores)
-
+        # Concatenate scores
+        scores = numpy.hstack(fold_scores[model_type])
+        
         # Compute error rates
-        error_rates[model_type] = error_rate(predictions, validation_labels)
+        minDCF[model_type] = minimum_DCF(scores, validation_labels, *application)
 
-    return error_rates
+    return minDCF
 
 
 def logistic_regression_kfold(

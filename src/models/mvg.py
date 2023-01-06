@@ -168,16 +168,20 @@ class MVG:
 
         Returns:
             numpy.ndarray:           List of logarithms of the joint distribution for samples and classes
+            numpy.ndarray:           Log likelihood ratio for each sample
         """
 
         # Compute class-conditional probabilities for each class
         S = [MVG.logpdf_GAU_ND(DTE, self.µ[c], self.Σ if self.is_tied else self.Σ[c]) for c in range(len(self.labels))]
 
+        # Compute Log Likelihood Ratios
+        llr = S[1] - S[0]
+        
         # Combine the scores with prior information
         log_priors = vcol(numpy.log(priors))
         log_SJoint = S + log_priors
 
-        return log_SJoint
+        return log_SJoint, llr
 
     @staticmethod
     def predict_samples(log_SJoint: numpy.ndarray) -> numpy.ndarray:

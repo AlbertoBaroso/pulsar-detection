@@ -41,3 +41,20 @@ def extended_data_matrix(D: numpy.ndarray, K:float=1.0):
         (numpy.ndarray): Extended data matrix
     """
     return numpy.vstack((D, numpy.full((1, D.shape[1]), K)))
+
+
+def shuffle_data(D: numpy.ndarray, L: numpy.ndarray) -> tuple[numpy.ndarray, numpy.ndarray]:
+    """
+    Shuffle data and labels
+
+    Args:
+        D (numpy.ndarray): Data matrix
+        L (numpy.ndarray): Label vector
+
+    Returns:
+        tuple[numpy.ndarray, numpy.ndarray]: Shuffled data and labels
+    """
+    indices = numpy.arange(D.shape[1])
+    numpy.random.seed(1)
+    numpy.random.shuffle(indices)
+    return D[:, indices], L[indices]

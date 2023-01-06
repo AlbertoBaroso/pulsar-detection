@@ -5,8 +5,6 @@ import numpy
 
 ### GAUSSIANIZATION ###
 
-import math
-
 def rank_samples(feature: numpy.ndarray, training_samples: Optional[numpy.ndarray]) -> list[float]:
     """
     Compute, for each value, the percentage of values smaller than the current value

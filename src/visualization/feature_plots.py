@@ -1,5 +1,5 @@
 from data_processing.data_load import load_training, load_features
-from data_processing.analytics import pearson_correlation, z_normalization
+from data_processing.analytics import pearson_correlation
 from data_processing.dimensionality_reduction import pca
 from data_processing.utils import project_data
 from constants import PCA_COMPONENTS
@@ -89,19 +89,20 @@ def plot_feature_pairs_sctterplots(features: list[str], samples: numpy.ndarray, 
                 plt.show()
 
 
-def plot_correlation_heatmap(samples: numpy.ndarray) -> None:
+def plot_correlation_heatmap(samples: numpy.ndarray, color: str) -> None:
     """
     Plot heatmap of pearson correlation between features
 
     Args:
         samples (numpy.ndarray): array of samples
+        color (str):             color of the heatmap
 
     Returns:
         None
     """
 
     pearson_matrix = pearson_correlation(samples)
-    plt.imshow(pearson_matrix, cmap="gist_yarg", vmin=0, vmax=1)
+    plt.imshow(pearson_matrix, cmap=color, vmin=0, vmax=1)
     # Add correlation value on each square of the heatmap
     for x in range(len(pearson_matrix)):
         for y in range(len(pearson_matrix[x])):
@@ -116,14 +117,15 @@ if __name__ == "__main__":
     samples, labels = load_training()
     features = load_features()
 
-    z_normalized_samples = z_normalization(samples)
-    pca_projection_matrix = pca(samples, PCA_COMPONENTS)
+    pca_projection_matrix = pca(samples, 4)
     pca_samples = project_data(samples, pca_projection_matrix)
+    non_pulsars = pca_samples[:, labels == 0]
+    pulsars = pca_samples[:, labels == 1]
 
     # Correlation heatmaps
-    plot_correlation_heatmap(samples)
-    plot_correlation_heatmap(pca_samples)
-    plot_correlation_heatmap(z_normalized_samples)
+    plot_correlation_heatmap(pca_samples, "gist_yarg")
+    plot_correlation_heatmap(non_pulsars, "Reds")
+    plot_correlation_heatmap(pulsars, "Blues")
 
     # Plot histogram for all features
     plot_features_histograms(features, samples, labels)

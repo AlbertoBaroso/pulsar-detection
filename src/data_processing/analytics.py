@@ -3,7 +3,7 @@ import numpy
 
 
 def compute_analytics(features, samples):
-    """ Compute and print: mean, min and max value of each feature """
+    """Compute and print: mean, min and max value of each feature"""
     print("Feature \t\t\t\t\t│  Mean \t│  Min \t\t│  Max")
     print("─" * 90)
     for i, feature in enumerate(features):
@@ -15,17 +15,17 @@ def compute_analytics(features, samples):
 
 
 def pearson_correlation(samples):
-    """ Compute the Pearson correlation coefficient between each pair of features """
+    """Compute the Pearson correlation coefficient between each pair of features"""
     return numpy.absolute(numpy.corrcoef(samples))
 
 
 def empirical_mean(array: numpy.ndarray) -> numpy.ndarray:
-    """ Compute the empirical mean of a dataset """
+    """Compute the empirical mean of a dataset"""
     return vcol(array.mean(1))
 
 
 def covariance_matrix(D: numpy.ndarray) -> numpy.ndarray:
-    """ Compute the covariance matrix for a dataset """
+    """Compute the covariance matrix for a dataset"""
     # Compute mean foreach column (feature)
     mu = empirical_mean(D)
     # Compute the 0-mean matrix (centered data)
@@ -43,7 +43,7 @@ def between_class_covariance_matrix(D: numpy.ndarray, labels: numpy.ndarray, cla
         D (numpy.ndarray): The entire dataset
         labels (numpy.ndarray): Labels of each sample
         classes (numpy.ndarray): List of all distinct labels
-        
+
     Returns:
         numpy.ndarray: The between-class covariance matrix
     """
@@ -68,7 +68,7 @@ def within_class_covariance_matrix(D: numpy.ndarray, labels: numpy.ndarray, clas
         D (numpy.ndarray): The entire dataset
         labels (numpy.ndarray): Labels of each sample
         classes (numpy.ndarray): List of all distinct labels
-        
+
     Returns:
         numpy.ndarray: The within-class covariance matrix
     """
@@ -81,37 +81,8 @@ def within_class_covariance_matrix(D: numpy.ndarray, labels: numpy.ndarray, clas
     return SW / N
 
 
-def logpdf_GAU_ND(X: numpy.ndarray, mu: numpy.ndarray, C: numpy.ndarray) -> numpy.ndarray:
-    """
-    Compute the log-density of a multivariate Gaussian distribution for all samples
-
-    Args:
-        X (numpy.ndarray):  Original dataset, of shape (n, m) where n is the number of features and m is the number of samples
-        mu (numpy.ndarray): Mean of the MVG distribution, it has shape (n, 1)
-        C (numpy.ndarray):  Covariance matrix of the MVG distribution, it has shape (n, n)
-
-    Returns:
-        numpy.ndarray: the log-density of the MVG distribution computed for each sample, it has shape (m, 1)
-    """
-    covariance_inverse = numpy.linalg.inv(C)
-    M = X.shape[0]
-    # the absolute value of the log-determinant is the second value
-    determinant_logarithm = numpy.linalg.slogdet(C)[1]
-    Y = numpy.array([])
-    for i in range(X.shape[1]):
-        x = X[:, i : i + 1]
-        centered_sample = x - mu
-        log_density = (
-            -(M / 2 * numpy.log(2 * numpy.pi))
-            - (1 / 2 * determinant_logarithm)
-            - (1 / 2 * numpy.dot(centered_sample.T, numpy.dot(covariance_inverse, centered_sample)))
-        )
-        Y = numpy.append(Y, log_density)
-    return Y.ravel()
-
-
 def z_normalization(features: numpy.ndarray, comparison_features: numpy.ndarray = None) -> numpy.ndarray:
-    """ Compute the z-normalization of a set of features """
+    """Compute the z-normalization of a set of features"""
     z_scores = []
     for i, feature in enumerate(features):
         mean = feature.mean() if comparison_features is None else comparison_features[i].mean()
@@ -121,9 +92,48 @@ def z_normalization(features: numpy.ndarray, comparison_features: numpy.ndarray 
 
 
 def st_dev(samples: numpy.ndarray) -> float:
-    """ Compute the standard deviation of a set of samples """
+    """Compute the standard deviation of a set of samples"""
     mu = samples.mean()
     differences = [(value - mu) ** 2 for value in samples]
     sum_of_differences = sum(differences)
     standard_deviation = (sum_of_differences / (len(samples) - 1)) ** 0.5
     return standard_deviation
+
+
+def confusion_matrix(predicted_labels: numpy.ndarray, actual_labels: numpy.ndarray, K: int = 2) -> numpy.ndarray:
+    """
+    Compute the confusion matrix given predicted and actual labels
+
+    Args:
+        predicted_labels (numpy.ndarray):   Predicted labels for each sample, it has shape (m, 1)
+        actual_labels (numpy.ndarray):      Actual labels of test samples
+        K (int):                            Number of classes
+
+    Returns:
+        numpy.ndarray:                      Confusion matrix
+    """
+
+    CM = numpy.zeros((K, K), dtype=int)
+    for predicted in range(K):
+        for actual in range(K):
+            CM[predicted, actual] = ((predicted_labels == predicted) * (actual_labels == actual)).sum()
+    return CM
+
+
+def fnr_fpr(confusion_matrix: numpy.ndarray) -> tuple[float, float]:
+    """
+    Compute the false negative rate and false positive rate given the confusion matrix
+
+    Args:
+        confusion_matrix (numpy.ndarray): Array of shape (K, K) where K is the number of classes
+
+    Returns:
+        tuple[float, float]: False negative rate and false positive rate
+    """
+    FN = confusion_matrix[0][1]
+    TP = confusion_matrix[1][1]
+    FP = confusion_matrix[1][0]
+    TN = confusion_matrix[0][0]
+    FNR = FN / (FN + TP)
+    FPR = FP / (FP + TN)
+    return FNR, FPR
