@@ -6,28 +6,33 @@ import numpy
 
 
 class LogisticRegression:
-    def __init__(self, DTR: numpy.ndarray, LTR: numpy.ndarray, λ: float):
+    def __init__(self, DTR: numpy.ndarray, LTR: numpy.ndarray, λ: float, πt: float):
         """
         Args:
             DTR (numpy.ndarray): Training dataset
             LTR (numpy.ndarray): Labels for the training dataset
-            λ (float): Regularization parameter
+            λ (float):           Regularization parameter
+            πt (float):          Prior probability of the first class
         """
-        N = DTR.shape[0]
-        self.DTR = DTR
-        self.LTR = LTR
+        
+        Z = 2.0 * LTR - 1.0
+        self.DTR_non_pulsar = DTR[:, LTR==0]
+        self.DTR_pulsar = DTR[:, LTR==1]
+        self.Z_non_pulsar = Z[LTR == 0]
+        self.Z_pulsar = Z[LTR == 1]
+        self.πt = πt
         self.λ = λ
 
         # Train the model
         x, _f, _d = scipy.optimize.fmin_l_bfgs_b(func=self.logreg_obj, x0=numpy.zeros(DTR.shape[0] + 1), approx_grad=True)
-        self.w, self.b = x[:N], x[-1]
+        self.w, self.b = x[:-1], x[-1]
 
     def logreg_obj(self, v: numpy.ndarray):
         """
         Objective function for the logistic regression problem.
 
         Args:
-            v (numpy.ndarray): array with shape (D+1,) where D is the dimensionality of the feature space
+            v (numpy.ndarray): Array with shape (D+1,) where D is the dimensionality of the feature space
         """
 
         w, b = v[:-1], v[-1]
@@ -41,12 +46,21 @@ class LogisticRegression:
         #     cross_entropy += numpy.logaddexp(0, exponent)
 
         # VECTORIAL VERSION
-        Z = 2.0 * self.LTR - 1.0
-        S = numpy.dot(w.T, self.DTR) + b  # Scores
-        cross_entropy = numpy.logaddexp(0, -S * Z)
+        # Z = 2.0 * self.LTR - 1.0
+        # S = numpy.dot(w.T, self.DTR) + b  # Scores
+        # cross_entropy = numpy.logaddexp(0, -S * Z)
+        # regularization_term = (self.λ / 2) * (numpy.linalg.norm(w) ** 2)
+        # return regularization_term + cross_entropy.mean()
+
+        # VECTORIAL BALANCED VERSION
+        S_non_pulsar = numpy.dot(w.T, self.DTR_non_pulsar) + b
+        S_pulsar = numpy.dot(w.T, self.DTR_pulsar) + b
+        
+        non_pulsar = (1 - self.πt) * numpy.logaddexp(0, -S_non_pulsar * self.Z_non_pulsar).mean()
+        pulsar = self.πt * numpy.logaddexp(0, -S_pulsar * self.Z_pulsar).mean()
 
         regularization_term = (self.λ / 2) * (numpy.linalg.norm(w) ** 2)
-        return regularization_term + cross_entropy.mean()
+        return regularization_term + non_pulsar + pulsar
 
     def score_samples(self, DTE: numpy.ndarray) -> numpy.ndarray:
         """
