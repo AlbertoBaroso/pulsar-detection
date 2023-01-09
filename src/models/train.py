@@ -63,10 +63,16 @@ def train_mvg_models(
 
 
 def train_gmm_models(
-    DTR: numpy.ndarray, LTR: numpy.ndarray, DTE: numpy.ndarray, LTE: numpy.ndarray, class_priors: list[float], labels: list[int], steps: int
-):
+    DTR: numpy.ndarray,
+    LTR: numpy.ndarray,
+    DTE: numpy.ndarray,
+    LTE: numpy.ndarray,
+    class_priors: list[float],
+    steps: int,
+    application: tuple[float, float, float],
+) -> float:
 
-    gmm_error_rates = {}
+    gmm_minDCF = {}
 
     for model_type in MVGModel:
 
@@ -76,15 +82,11 @@ def train_gmm_models(
 
         # Compute scores for each class
         posteriors = [gmm_non_pulsar.log_pdf(DTE)[1], gmm_pulsar.log_pdf(DTE)[1]]
+        
+        # Compute minimum DCF
+        gmm_minDCF[model_type] = minimum_DCF(posteriors, LTE, *application)
 
-        # Predict labels
-        predictions = numpy.argmax(posteriors, axis=0)
-
-        # Compute error rates
-        error_rate = error_rate(predictions, LTE)
-        print("{:.2f}%".format(error_rate * 100))
-
-    return gmm_error_rates
+    return gmm_minDCF
 
 
 def train_svm_model(
@@ -96,9 +98,12 @@ def train_svm_model(
     C: float,
     kernel_type: KernelType,
     kernel_params: tuple,
-):
+    application: tuple[float, float, float],
+) -> float:
 
     kernel, csi = None, K**2
+    πT = application[0]
+    
     if kernel_type == KernelType.POLYNOMIAL:
         d, c = kernel_params
         kernel = SVM.polynomial_kernel(training_samples, training_samples, c, d, csi)
@@ -107,7 +112,7 @@ def train_svm_model(
         kernel = SVM.RBF_kernel(training_samples, training_samples, γ, csi)
 
     # Train models
-    svm = SVM(training_samples, training_labels, C, K, kernel)
+    svm = SVM(training_samples, training_labels, C, K, πT, kernel)
     svm.dual()
 
     # Compute scores
@@ -120,13 +125,9 @@ def train_svm_model(
         DTE_extended = extended_data_matrix(test_samples, K)
         scores = svm.score_samples(DTE_extended)
 
-    # Predict labels
-    predictions = SVM.predict_samples(scores)
+    minDCF = minimum_DCF(scores, test_labels, *application)
 
-    # Compute error rates
-    svm_error_rate = error_rate(predictions, test_labels)
-
-    return svm_error_rate
+    return minDCF
 
 
 # K-Fold Cross Validation #
@@ -183,7 +184,7 @@ def logistic_regression_kfold(
     validation_samples: numpy.ndarray,
     validation_labels: numpy.ndarray,
     λ: float,
-    πt: float,
+    πT: float,
     application: tuple[float, float, float],
 ) -> float:
     """
@@ -195,7 +196,7 @@ def logistic_regression_kfold(
         validation_samples (numpy.ndarray): Validation dataset, of shape (K, n, m)
         validation_labels: (numpy.array):   Validation labels, of shape (m, )
         λ (float):                          Regularization parameter
-        πt (float):                         Prior probability of the first class
+        πT (float):                         Prior probability of the first class
         application (tuple):                Effective prior, Cost of false positive, Cost of false negative
     """
 
@@ -205,7 +206,7 @@ def logistic_regression_kfold(
     for DTR, LTR, DVAL in zip(training_samples, training_labels, validation_samples):
 
         # Train model
-        model = LogisticRegression(DTR, LTR, λ, πt)
+        model = LogisticRegression(DTR, LTR, λ, πT)
         # Compute scores for each class
         fold_scores.append(model.score_samples(DVAL))
 
@@ -272,6 +273,8 @@ def svm_kfold(
     C: float,
     kernel_type: KernelType,
     kernel_params: tuple,
+    πT : float, 
+    application: tuple[float, float, float],
 ):
     """
     K-fold cross validation for SVM models
@@ -285,6 +288,8 @@ def svm_kfold(
         C (float):                          Regularization parameter
         kernel_type (KernelType):           Type of kernel to use
         kernel_params (tuple):              Parameters of the kernel
+        πT (float):                         Prior probability of the first class
+        application (tuple):                Effective prior, Cost of false positive, Cost of false negative
     """
 
     scores = []
@@ -301,7 +306,7 @@ def svm_kfold(
             kernel = SVM.RBF_kernel(DTR, DTR, γ, csi)
 
         # Train models
-        svm = SVM(DTR, LTR, C, K, kernel)
+        svm = SVM(DTR, LTR, C, K, πT, kernel)
         svm.dual()
 
         # Compute scores
@@ -317,10 +322,6 @@ def svm_kfold(
 
     scores = numpy.hstack(scores)
 
-    # Predict labels
-    predictions = SVM.predict_samples(scores)
+    minDCF = minimum_DCF(scores, validation_labels, *application)
 
-    # Compute error rates
-    svm_error_rate = error_rate(predictions, validation_labels)
-
-    return svm_error_rate
+    return minDCF

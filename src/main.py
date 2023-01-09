@@ -43,154 +43,156 @@ if __name__ == "__main__":
     # Logistic Regression #
     #######################
 
-    for λ in LOG_REG_λ:
+    # for λ in LOG_REG_λ:
 
-        for application in APPLICATIONS:
+    #     for application in APPLICATIONS:
         
-            for πt, _, _ in APPLICATIONS:
+    #         for πT, _, _ in APPLICATIONS:
 
-                print("# LOGISTIC REGRESSION MinDCF, λ = {}, πt = {}, {} #".format(λ, πt, application))
+    #             print("# LOGISTIC REGRESSION MinDCF, λ = {}, πT = {}, {} #".format(λ, πT, application))
             
-                # Raw features #
-                logisitc_regression_error = logistic_regression_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, LVAL, λ, application)
-                print("RAW: {}".format(logisitc_regression_error))
+    #             # Raw features #
+    #             logisitc_regression_error = logistic_regression_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, LVAL, λ,, πT application)
+    #             print("RAW: {}".format(logisitc_regression_error))
 
-                # PCA #
-                logisitc_regression_error = logistic_regression_kfold(DTR_kfold_pca, LTR_kfold, DVAL_kfold_pca, LVAL, λ, application)
-                print("PCA: {}".format(logisitc_regression_error))
+    #             # PCA #
+    #             logisitc_regression_error = logistic_regression_kfold(DTR_kfold_pca, LTR_kfold, DVAL_kfold_pca, LVAL, λ, πT, application)
+    #             print("PCA: {}".format(logisitc_regression_error))
 
-                # LDA #
-                logisitc_regression_error = logistic_regression_kfold(DTR_kfold_lda, LTR_kfold, DVAL_kfold_lda, LVAL, λ, application)
-                print("LDA: {}".format(logisitc_regression_error))
+    #             # LDA #
+    #             logisitc_regression_error = logistic_regression_kfold(DTR_kfold_lda, LTR_kfold, DVAL_kfold_lda, LVAL, λ, πT, application)
+    #             print("LDA: {}".format(logisitc_regression_error))
 
-                # GAUSSIANIZED FEATURES #
-                logisitc_regression_error = logistic_regression_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, λ, application)
-                print("GAUSSIANIZED: {}".format(logisitc_regression_error))
+    #             # GAUSSIANIZED FEATURES #
+    #             logisitc_regression_error = logistic_regression_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, λ, πT, application)
+    #             print("GAUSSIANIZED: {}".format(logisitc_regression_error))
                 
-                # Z-NORMALIZED FEATURES #
-                logisitc_regression_error = logistic_regression_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, λ, πt, application)
-                print("Z-NORMALIZED: {}".format(logisitc_regression_error))
+    #             # Z-NORMALIZED FEATURES #
+    #             logisitc_regression_error = logistic_regression_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, λ, πT, application)
+    #             print("Z-NORMALIZED: {}".format(logisitc_regression_error))
         
-    # print("\n" * 5)
+    # # print("\n" * 5)
 
     # ##############
     # # MVG MODELS #
     # ##############
 
-    for application in APPLICATIONS:
+    # for application in APPLICATIONS:
 
-        # RAW FEATURES #
-        validated_mvg_models = mvg_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, LVAL, LABELS, application)
-        print("# RAW Features - {} #".format(application))
-        for model_type, model_minDCF in validated_mvg_models.items():
-            print("{}: {}".format(model_type, model_minDCF))
+    #     # RAW FEATURES #
+    #     validated_mvg_models = mvg_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, LVAL, LABELS, application)
+    #     print("# RAW Features - {} #".format(application))
+    #     for model_type, model_minDCF in validated_mvg_models.items():
+    #         print("{}: {}".format(model_type, model_minDCF))
 
-        # LDA #
-        validated_mvg_models = mvg_kfold(DTR_kfold_lda, LTR_kfold, DVAL_kfold_lda, LVAL, LABELS, application)
-        print("# LDA Features - {} #".format(application))
-        for model_type, model_minDCF in validated_mvg_models.items():
-            print("{}: {}".format(model_type, model_minDCF))
+    #     # LDA #
+    #     validated_mvg_models = mvg_kfold(DTR_kfold_lda, LTR_kfold, DVAL_kfold_lda, LVAL, LABELS, application)
+    #     print("# LDA Features - {} #".format(application))
+    #     for model_type, model_minDCF in validated_mvg_models.items():
+    #         print("{}: {}".format(model_type, model_minDCF))
 
-        # PCA #
-        validated_mvg_models = mvg_kfold(DTR_kfold_pca, LTR_kfold, DVAL_kfold_pca, LVAL, LABELS, application)
-        print("# PCA Features - {} #".format(application))
-        for model_type, model_minDCF in validated_mvg_models.items():
-            print("{}: {}".format(model_type, model_minDCF))
+    #     # PCA #
+    #     validated_mvg_models = mvg_kfold(DTR_kfold_pca, LTR_kfold, DVAL_kfold_pca, LVAL, LABELS, application)
+    #     print("# PCA Features - {} #".format(application))
+    #     for model_type, model_minDCF in validated_mvg_models.items():
+    #         print("{}: {}".format(model_type, model_minDCF))
 
-        # GAUSSIANIZED FEATURES #
-        validated_mvg_models = mvg_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, LABELS, application)
-        print("# GAUSSIANIZED Features - {} #".format(application))
-        for model_type, model_minDCF in validated_mvg_models.items():
-            print("{}: {}".format(model_type, model_minDCF))
+    #     # GAUSSIANIZED FEATURES #
+    #     validated_mvg_models = mvg_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, LABELS, application)
+    #     print("# GAUSSIANIZED Features - {} #".format(application))
+    #     for model_type, model_minDCF in validated_mvg_models.items():
+    #         print("{}: {}".format(model_type, model_minDCF))
 
-        # Z-NORMALIZED FEATURES #
-        validated_mvg_models = mvg_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, LABELS, application)
-        print("# Z-NORMALIZED Features - {} #".format(application))
-        for model_type, model_minDCF in validated_mvg_models.items():
-            print("{}: {}".format(model_type, model_minDCF))
+    #     # Z-NORMALIZED FEATURES #
+    #     validated_mvg_models = mvg_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, LABELS, application)
+    #     print("# Z-NORMALIZED Features - {} #".format(application))
+    #     for model_type, model_minDCF in validated_mvg_models.items():
+    #         print("{}: {}".format(model_type, model_minDCF))
 
-    ##############
-    # GMM MODELS #
-    ##############
+    # ##############
+    # # GMM MODELS #
+    # ##############
     
-    class_priors = [0.5, 0.5]
+    # class_priors = [0.5, 0.5]
     
-    for steps in range(1, 5):
+    # for steps in range(1, 5):
         
-        # RAW FEATURES #
-        validated_gmm_models = gmm_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, LVAL, class_priors, steps)
-        print("# RAW Features - Priors: {} - Steps: {} #".format(class_priors, steps))
-        for model_type, model_error_rate in validated_gmm_models.items():
-            print("{}: {}".format(model_type, model_error_rate))
+    #     # RAW FEATURES #
+    #     validated_gmm_models = gmm_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, LVAL, class_priors, steps)
+    #     print("# RAW Features - Priors: {} - Steps: {} #".format(class_priors, steps))
+    #     for model_type, model_error_rate in validated_gmm_models.items():
+    #         print("{}: {}".format(model_type, model_error_rate))
             
-        # LDA #
-        validated_gmm_models = gmm_kfold(DTR_kfold_lda, LTR_kfold, DVAL_kfold_lda, LVAL, class_priors, steps)
-        print("# LDA Features - Priors: {} - Steps: {} #".format(class_priors, steps))
-        for model_type, model_error_rate in validated_gmm_models.items():
-            print("{}: {}".format(model_type, model_error_rate))
+    #     # LDA #
+    #     validated_gmm_models = gmm_kfold(DTR_kfold_lda, LTR_kfold, DVAL_kfold_lda, LVAL, class_priors, steps)
+    #     print("# LDA Features - Priors: {} - Steps: {} #".format(class_priors, steps))
+    #     for model_type, model_error_rate in validated_gmm_models.items():
+    #         print("{}: {}".format(model_type, model_error_rate))
 
-        # PCA #
-        validated_gmm_models = gmm_kfold(DTR_kfold_pca, LTR_kfold, DVAL_kfold_pca, LVAL, class_priors, steps)
-        print("# PCA Features - Priors: {} - Steps: {} #".format(class_priors, steps))
-        for model_type, model_error_rate in validated_gmm_models.items():
-            print("{}: {}".format(model_type, model_error_rate))
+    #     # PCA #
+    #     validated_gmm_models = gmm_kfold(DTR_kfold_pca, LTR_kfold, DVAL_kfold_pca, LVAL, class_priors, steps)
+    #     print("# PCA Features - Priors: {} - Steps: {} #".format(class_priors, steps))
+    #     for model_type, model_error_rate in validated_gmm_models.items():
+    #         print("{}: {}".format(model_type, model_error_rate))
 
-        # GAUSSIANIZED FEATURES #
-        validated_gmm_models = gmm_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, class_priors, steps)
-        print("# GAUSSIANIZED Features - Priors: {} - Steps: {} #".format(class_priors, steps))
-        for model_type, model_error_rate in validated_gmm_models.items():
-            print("{}: {}".format(model_type, model_error_rate))
+    #     # GAUSSIANIZED FEATURES #
+    #     validated_gmm_models = gmm_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, class_priors, steps)
+    #     print("# GAUSSIANIZED Features - Priors: {} - Steps: {} #".format(class_priors, steps))
+    #     for model_type, model_error_rate in validated_gmm_models.items():
+    #         print("{}: {}".format(model_type, model_error_rate))
 
-        # Z-NORMALIZED FEATURES #
-        validated_gmm_models = gmm_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, class_priors, steps)
-        print("# Z-NORMALIZED Features - Priors: {} - Steps: {} #".format(class_priors, steps))
-        for model_type, model_error_rate in validated_gmm_models.items():
-            print("{}: {}".format(model_type, model_error_rate))
+    #     # Z-NORMALIZED FEATURES #
+    #     validated_gmm_models = gmm_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, class_priors, steps)
+    #     print("# Z-NORMALIZED Features - Priors: {} - Steps: {} #".format(class_priors, steps))
+    #     for model_type, model_error_rate in validated_gmm_models.items():
+    #         print("{}: {}".format(model_type, model_error_rate))
     
     ##############
     # SVM MODELS #
     ##############
 
     svm_params = [
-        (1.0, 0.1, KernelType.NO_KERNEL, None),
-        (1.0, 1.0, KernelType.NO_KERNEL, None),
-        (1.0, 10.0, KernelType.NO_KERNEL, None),
-        (10.0, 0.1, KernelType.NO_KERNEL, None),
-        (10.0, 1.0, KernelType.NO_KERNEL, None),
-        (10.0, 10, KernelType.NO_KERNEL, None),
-        (0.0, 1.0, KernelType.POLYNOMIAL, (2, 0)),
-        (1.0, 1.0, KernelType.POLYNOMIAL, (2, 0)),
-        (0.0, 1.0, KernelType.POLYNOMIAL, (2, 1)),
-        (1.0, 1.0, KernelType.POLYNOMIAL, (2, 1)),
-        (0.0, 1.0, KernelType.RBF, (1.0)),
-        (0.0, 1.0, KernelType.RBF, (10.0)),
-        (1.0, 1.0, KernelType.RBF, (1.0)),
-        (1.0, 1.0, KernelType.RBF, (10.0)),
+        (1.0, 0.01, KernelType.NO_KERNEL, None),
+        # (1.0, 0.1, KernelType.NO_KERNEL, None),
+        # (1.0, 1.0, KernelType.NO_KERNEL, None),
+        # (1.0, 10.0, KernelType.NO_KERNEL, None),
+        # (10.0, 0.1, KernelType.NO_KERNEL, None),
+        # (10.0, 1.0, KernelType.NO_KERNEL, None),
+        # (10.0, 10, KernelType.NO_KERNEL, None),
+        # (0.0, 1.0, KernelType.POLYNOMIAL, (2, 0)),
+        # (1.0, 1.0, KernelType.POLYNOMIAL, (2, 0)),
+        # (0.0, 1.0, KernelType.POLYNOMIAL, (2, 1)),
+        # (1.0, 1.0, KernelType.POLYNOMIAL, (2, 1)),
+        # (0.0, 1.0, KernelType.RBF, (1.0)),
+        # (0.0, 1.0, KernelType.RBF, (10.0)),
+        # (1.0, 1.0, KernelType.RBF, (1.0)),
+        # (1.0, 1.0, KernelType.RBF, (10.0)),
     ]
     
     for K, C, kernel_type, kernel_params in svm_params:
     
-        # RAW FEATURES #
-        svm_error_rate = svm_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, LVAL, K, C, kernel_type, kernel_params)
-        print("# RAW Features - K: {} - C: {} - Kernel: {} - Params: {} #".format(K, C, kernel_type, kernel_params))
-        print("RAW Error rate: {}".format(svm_error_rate))
-            
-        # LDA #
-        svm_error_rate = svm_kfold(DTR_kfold_lda, LTR_kfold, DVAL_kfold_lda, LVAL, K, C, kernel_type, kernel_params)
-        print("# LDA Features - K: {} - C: {} - Kernel: {} - Params: {} #".format(K, C, kernel_type, kernel_params))
-        print("LDA Error rate: {}".format(svm_error_rate))
+        for application in APPLICATIONS:
+        
+            for πT, _, _ in [(None, 1, 1), *APPLICATIONS]:
+        
+                print("# RAW Features - {}, πT: {} - K: {} - C: {} - Kernel: {} - Params: {} #".format(application, πT, K, C, kernel_type, kernel_params))
+                
+                # # RAW FEATURES #
+                # validated_svm = svm_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, LVAL, K, C, kernel_type, kernel_params, πT, application)
+                # print("RAW: {}".format(validated_svm))
+                    
+                # # LDA #
+                # validated_svm = svm_kfold(DTR_kfold_lda, LTR_kfold, DVAL_kfold_lda, LVAL, K, C, kernel_type, kernel_params, πT, application)
+                # print("LDA: {}".format(validated_svm))
 
-        # PCA #
-        svm_error_rate = svm_kfold(DTR_kfold_pca, LTR_kfold, DVAL_kfold_pca, LVAL, K, C, kernel_type, kernel_params)
-        print("# PCA Features - K: {} - C: {} - Kernel: {} - Params: {} #".format(K, C, kernel_type, kernel_params))
-        print("RAW Error rate: {}".format(svm_error_rate))
+                # # PCA #
+                # validated_svm = svm_kfold(DTR_kfold_pca, LTR_kfold, DVAL_kfold_pca, LVAL, K, C, kernel_type, kernel_params, πT, application)
+                # print("PCA: {}".format(validated_svm))
 
-        # GAUSSIANIZED FEATURES #
-        svm_error_rate = svm_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, K, C, kernel_type, kernel_params)
-        print("# GAUSSIANIZED Features - K: {} - C: {} - Kernel: {} - Params: {} #".format(K, C, kernel_type, kernel_params))
-        print("RAW Error rate: {}".format(svm_error_rate))
+                # # GAUSSIANIZED FEATURES #
+                # validated_svm = svm_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, K, C, kernel_type, kernel_params, πT, application)
+                # print("GAUSSIANIZED: {}".format(validated_svm))
 
-        # Z-NORMALIZED FEATURES #
-        svm_error_rate = svm_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, K, C, kernel_type, kernel_params)
-        print("# Z-NORMALIZED Features - K: {} - C: {} - Kernel: {} - Params: {} #".format(K, C, kernel_type, kernel_params))
-        print("RAW Error rate: {}".format(svm_error_rate))
+                # Z-NORMALIZED FEATURES #
+                validated_svm = svm_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, K, C, kernel_type, kernel_params, πT, application)
+                print("Z-NORMALIZED: {}".format(validated_svm))

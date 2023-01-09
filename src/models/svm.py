@@ -13,16 +13,17 @@ class KernelType(Enum):
 
 
 class SVM:
-    def __init__(self, DTR: numpy.ndarray, LTR: numpy.ndarray, C: float, K: float = 1.0, kernel: numpy.ndarray = None) -> None:
+    def __init__(self, DTR: numpy.ndarray, LTR: numpy.ndarray, C: float, K: float, πT: float = None, kernel: numpy.ndarray = None) -> None:
         """
         Train Support Vector Machine model
 
         Args:
-            DTR (numpy.ndarray): Data matrix
-            LTR (numpy.ndarray): Label vector
-            C (float):
-            K (float, optional):
-            kernel (numpy.ndarray, optional):
+            DTR (numpy.ndarray):               Data matrix
+            LTR (numpy.ndarray):               Label vector
+            C (float):                         Regularization parameter
+            K (float):                         Regularization parameter
+            πT (float, optional):              Prior for the first class. Defaults to None.
+            kernel (numpy.ndarray, optional):  Kernel function. Defaults to None.
         """
 
         N = DTR.shape[1]  # Number of samples
@@ -33,6 +34,7 @@ class SVM:
         kernel = kernel if kernel is not None else numpy.dot(X̂.T, X̂)
         self.Ĥ = vcol(Z) * vrow(Z) * kernel
 
+        self.πT = πT
         self.C = C
         self.Z = Z
         self.N = N
@@ -67,7 +69,15 @@ class SVM:
                 - α_star: optimal value of the parameters
                 - Jmax: maximum value of the objective function
         """
-        constraints = [(0, self.C)] * self.N  # Constraint min and max values of each αi: 0 ≤ αi ≤ C
+        if self.πT is None:
+            constraints = [(0, self.C)] * self.N  # Constraint min and max values of each αi: 0 ≤ αi ≤ C
+        else:
+            πTemp = len(self.Z[self.Z == 1]) / self.N  # Empirical priors
+            πFemp = len(self.Z[self.Z == -1]) / self.N
+            Ct = self.C * self.πT / πTemp  # Costs proportional to the priors
+            Cf = self.C * (1 - self.πT) / πFemp
+            constraints = [(0, Ct) if self.Z[i] == 1 else (0, Cf) for i in range(self.N)]
+        
         α_star, Jmax, _d = scipy.optimize.fmin_l_bfgs_b(
             self.dual_formulation, numpy.zeros(self.N), args=(self.Ĥ, self.N), bounds=constraints
         )
@@ -109,81 +119,6 @@ class SVM:
 
     def RBF_scores(self, DTR, DTE, γ, const):
         return numpy.dot((vcol(self.α_star) * vcol(self.Z)).T, SVM.RBF_kernel(DTR, DTE, γ, const))
-
-
-if __name__ == "__main__":
-
-    D, L = load_iris_binary()
-    (DTR, DTE), (LTR, LTE) = split_db_2to1(D, L)
-
-    params = [
-        (1.0, 0.1),
-        (1.0, 1.0),
-        (1.0, 10.0),
-        (10.0, 0.1),
-        (10.0, 1.0),
-        (10.0, 10),
-    ]
-
-    # # Higher values of K correspond to weaker regularization of the SVM bias term
-
-    for K, C in params:
-        print(f"### K = {K}, C = {C} ###")
-
-        DTE_extended = extended_data_matrix(DTE, K)
-        svm = SVM(DTR, LTR, C, K)
-        svm.dual()
-        dual = -svm.dual_formulation(svm.α_star, svm.X̂, svm.Z, svm.N)[0]
-        primal = svm.primal()
-        dual_gap = svm.duality_gap(primal, dual)
-        scores = svm.score_samples(DTE_extended)
-        predictions = SVM.predict_samples(scores)
-        error_rate = 1 - (predictions == LTE).sum() / LTE.size
-
-        print("Primal solution: ", primal)
-        print("Dual solution: ", dual)
-        print("Dual gap: ", dual_gap)
-        print("Error rate: ", error_rate)
-
-    print("___ KERNELS ___")
-
-    params = [
-        (0.0, 1.0, KernelType.POLYNOMIAL, (2, 0)),
-        (1.0, 1.0, KernelType.POLYNOMIAL, (2, 0)),
-        (0.0, 1.0, KernelType.POLYNOMIAL, (2, 1)),
-        (1.0, 1.0, KernelType.POLYNOMIAL, (2, 1)),
-        (0.0, 1.0, KernelType.RBF, (1.0)),
-        (0.0, 1.0, KernelType.RBF, (10.0)),
-        (1.0, 1.0, KernelType.RBF, (1.0)),
-        (1.0, 1.0, KernelType.RBF, (10.0)),
-    ]
-
-    for K, C, kernel_type, kernel_params in params:
-
-        csi = K**2
-        if kernel_type == KernelType.POLYNOMIAL:
-            d, c = kernel_params
-            kernel = SVM.polynomial_kernel(DTR, DTR, c, d, csi)
-        else:
-            γ = kernel_params
-            kernel = SVM.RBF_kernel(DTR, DTR, γ, csi)
-
-        svm = SVM(DTR, LTR, C, K, kernel)
-
-        svm.dual()
-        dual = -svm.dual_formulation(svm.α_star, svm.X̂, svm.Z, svm.N, kernel)[0]
-
-        if kernel_type == KernelType.POLYNOMIAL:
-            scores = svm.polynomial_scores(DTR, DTE, c, d, csi)
-        else:
-            scores = svm.RBF_scores(DTR, DTE, γ, csi)
-
-        predictions = SVM.predict_samples(scores)
-        error_rate = 1 - ((predictions == LTE).sum() / LTE.size)
-
-        print(f"### K = {K}, C = {C}, kernel = {kernel_type}, kernel_params = {kernel_params} ###")
-        print("Dual solution: ", dual)
-        print("Error rate: ", error_rate)
 
 
 """

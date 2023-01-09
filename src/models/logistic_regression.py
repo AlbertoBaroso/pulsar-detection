@@ -6,13 +6,13 @@ import numpy
 
 
 class LogisticRegression:
-    def __init__(self, DTR: numpy.ndarray, LTR: numpy.ndarray, λ: float, πt: float):
+    def __init__(self, DTR: numpy.ndarray, LTR: numpy.ndarray, λ: float, πT: float):
         """
         Args:
             DTR (numpy.ndarray): Training dataset
             LTR (numpy.ndarray): Labels for the training dataset
             λ (float):           Regularization parameter
-            πt (float):          Prior probability of the first class
+            πT (float):          Prior probability of the first class
         """
         
         Z = 2.0 * LTR - 1.0
@@ -20,7 +20,7 @@ class LogisticRegression:
         self.DTR_pulsar = DTR[:, LTR==1]
         self.Z_non_pulsar = Z[LTR == 0]
         self.Z_pulsar = Z[LTR == 1]
-        self.πt = πt
+        self.πT = πT
         self.λ = λ
 
         # Train the model
@@ -56,8 +56,8 @@ class LogisticRegression:
         S_non_pulsar = numpy.dot(w.T, self.DTR_non_pulsar) + b
         S_pulsar = numpy.dot(w.T, self.DTR_pulsar) + b
         
-        non_pulsar = (1 - self.πt) * numpy.logaddexp(0, -S_non_pulsar * self.Z_non_pulsar).mean()
-        pulsar = self.πt * numpy.logaddexp(0, -S_pulsar * self.Z_pulsar).mean()
+        non_pulsar = (1 - self.πT) * numpy.logaddexp(0, -S_non_pulsar * self.Z_non_pulsar).mean()
+        pulsar = self.πT * numpy.logaddexp(0, -S_pulsar * self.Z_pulsar).mean()
 
         regularization_term = (self.λ / 2) * (numpy.linalg.norm(w) ** 2)
         return regularization_term + non_pulsar + pulsar
