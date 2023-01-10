@@ -222,7 +222,7 @@ def gmm_kfold(
     training_labels: numpy.ndarray,
     validation_samples: numpy.ndarray,
     validation_labels: numpy.ndarray,
-    class_priors: list[float],
+    application: tuple[float, float, float],
     steps: int,
 ):
     """
@@ -233,12 +233,12 @@ def gmm_kfold(
         training_labels (numpy.ndarray):    Training labels, of shape (K, m, )
         validation_samples (numpy.ndarray): Validation dataset, of shape (K, n, m)
         validation_labels: (numpy.array):   Validation labels, of shape (m, )
-        class_priors (numpy.ndarray):       List of prior probability of each class
+        application (tuple):                Effective prior, Cost of false positive, Cost of false negative
         steps (int):                        Number of steps for the EM algorithm, the number of resulting components is 2**steps
     """
 
-    error_rates = {}
-    scores = {model_type: [] for model_type in MVGModel}
+    minDCF = {}
+    fold_scores = {model_type: [] for model_type in MVGModel}
 
     # K-fold cross validation
     for DTR, LTR, DVAL in zip(training_samples, training_labels, validation_samples):
@@ -249,19 +249,21 @@ def gmm_kfold(
             gmm_pulsars = GMM(DTR[:, LTR == 1], steps, model_type)
             # Compute log likelihood ratios
             model_scores = gmm_pulsars.log_pdf(DVAL)[1] - gmm_non_pulsars.log_pdf(DVAL)[1]
-            scores[model_type].append(model_scores)
+            fold_scores[model_type].append(model_scores)
 
     for model_type in MVGModel:
 
-        fold_scores = numpy.hstack(scores[model_type])
+        scores = numpy.hstack(fold_scores[model_type])
 
-        # Predict labels
-        predictions = numpy.where(fold_scores >= 0, 1, 0)
+        minDCF[model_type] = minimum_DCF(scores, validation_labels, *application)
 
-        # Compute error rates
-        error_rates[model_type] = error_rate(predictions, validation_labels)
+        # # Predict labels
+        # predictions = numpy.where(scores >= 0, 1, 0)
 
-    return error_rates
+        # # Compute error rates
+        # error_rates[model_type] = error_rate(predictions, validation_labels)
+
+    return minDCF
 
 
 def svm_kfold(
