@@ -1,7 +1,9 @@
 from data_processing.comparison import optimal_bayes_decisions, normalized_DCF, minimum_DCF
 from data_processing.analytics import confusion_matrix
 import matplotlib.pyplot as plt
+from constants import LOG_REG_λ
 import numpy
+
 
 def bayes_error_plot(scores: numpy.ndarray, labels: numpy.ndarray) -> None:
     """
@@ -11,7 +13,7 @@ def bayes_error_plot(scores: numpy.ndarray, labels: numpy.ndarray) -> None:
         scores (numpy.ndarray): Scores assigned to the test samples
         labels (numpy.ndarray): Labels of the test samples
     """
-    
+
     effPriorLogOdds = numpy.linspace(-3, 3, 21)
     DCF, min_DCF = [], []
 
@@ -29,22 +31,20 @@ def bayes_error_plot(scores: numpy.ndarray, labels: numpy.ndarray) -> None:
     plt.ylim([0, 1.1])
     plt.xlim([-3, 3])
     plt.show()
-    
-    
-def print_confusion_matrix(confusion_matrix: numpy.ndarray) -> None:
-    """
-    Given a confusion matrix, print it in a readable format
 
-    Args:
-        confusion_matrix (numpy.ndarray): Array of shape (K, K) where K is the number of classes
-    """
-    print("\t\t\t  Actual")
-    size = len(confusion_matrix)
-    print("\t\t  |\t{}".format("\t".join(str(e) for e in list(range(size)))))
-    print("\t\t--" + "-" * 8 * size)
-    for k in range(size):
-        if int(size / 2) == k:
-            print("Predicted\t", end="")
-        else:
-            print("\t\t", end="")
-        print("{} |\t{}".format(k, "\t".join(str(e) for e in confusion_matrix[k])))
+
+def plot_minDCF_LR(title: str, applications: dict):
+
+    colors = ["r", "b", "g"]
+
+    for i, (application, minDCFs) in enumerate(applications.items()):
+
+        plt.plot(LOG_REG_λ, minDCFs, label=r'minDCF($\tilde{\pi}$ = ' + str(application[0]) + ")", color=colors[i])
+
+    plt.title(title)
+    plt.xlabel("λ")
+    plt.ylabel("minDCF")
+    plt.xscale('log')
+    plt.ylim([0, 1])
+    plt.legend()
+    plt.show()
