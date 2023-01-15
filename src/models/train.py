@@ -1,9 +1,9 @@
-from data_processing.comparison import error_rate, minimum_DCF
-from models.logistic_regression import LogisticRegression
 from data_processing.utils import extended_data_matrix
+from data_processing.comparison import minimum_DCF
+from models.lr import LogisticRegression
+from models.svm import SVM, KernelType
 from models.mvg import MVG, MVGModel
 from models.gmm import GMM
-from models.svm import SVM, KernelType
 import numpy
 
 # Single Model #

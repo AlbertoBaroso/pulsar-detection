@@ -117,7 +117,7 @@ if __name__ == "__main__":
     samples, labels = load_training()
     features = load_features()
 
-    pca_projection_matrix = pca(samples, 4)
+    pca_projection_matrix = pca(samples, PCA_COMPONENTS)
     pca_samples = project_data(samples, pca_projection_matrix)
     non_pulsars = pca_samples[:, labels == 0]
     pulsars = pca_samples[:, labels == 1]
