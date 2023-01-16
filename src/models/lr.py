@@ -1,3 +1,4 @@
+from data_processing.utils import vcol
 import scipy.optimize
 import numpy
 
@@ -6,14 +7,18 @@ import numpy
 
 
 class LogisticRegression:
-    def __init__(self, DTR: numpy.ndarray, LTR: numpy.ndarray, λ: float, πT: float):
+    def __init__(self, DTR: numpy.ndarray, LTR: numpy.ndarray, λ: float, πT: float, quadratic: bool = False):
         """
         Args:
             DTR (numpy.ndarray): Training dataset
             LTR (numpy.ndarray): Labels for the training dataset
             λ (float):           Regularization parameter
             πT (float):          Prior probability of the first class
+            quadratic (bool):    Whether to use a quadratic expanded feature space. Defaults to False.
         """
+        
+        if quadratic:
+            DTR = self.features_expansion(DTR)
         
         Z = 2.0 * LTR - 1.0
         self.DTR_non_pulsar = DTR[:, LTR==0]
@@ -62,16 +67,19 @@ class LogisticRegression:
         regularization_term = (self.λ / 2) * (numpy.linalg.norm(w) ** 2)
         return regularization_term + non_pulsar + pulsar
 
-    def score_samples(self, DTE: numpy.ndarray) -> numpy.ndarray:
+    def score_samples(self, DTE: numpy.ndarray, quadratic: bool = False) -> numpy.ndarray:
         """
         Assigns a score to each sample in the dataset.
 
         Args:
             DTE (numpy.ndarray): Test data to predict
+            quadratic (bool):    Whether to use a quadratic expanded feature space. Defaults to False.
 
         Returns:
             numpy.ndarray: Array of scores
         """
+        if quadratic:
+            DTE = self.features_expansion(DTE)
         return numpy.dot(self.w.T, DTE) + self.b
 
     @staticmethod
@@ -87,3 +95,20 @@ class LogisticRegression:
         """
         # Compute scores as posterior log-likelihood ratios
         return numpy.where(scores >= 0, 1, 0)
+    
+    @staticmethod
+    def features_expansion(X: numpy.ndarray) -> numpy.ndarray:
+        """
+        Compute a quadratic expanded feature space
+
+        Args:
+            X (numpy.ndarray): Samples to transform
+        Returns:
+            numpy.ndarray: Transformed samples
+        """
+        φ = []
+        for i in range(X.shape[1]):
+            Xt = vcol(X[:, i])
+            vec = numpy.reshape(numpy.dot(Xt, Xt.T), (-1, 1), order='F')
+            φ.append(vec)
+        return numpy.vstack((numpy.hstack(φ), X))

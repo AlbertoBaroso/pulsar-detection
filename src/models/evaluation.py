@@ -134,22 +134,25 @@ def evaluate_LR_models(
     LVAL: numpy.ndarray,
 ):
 
-    for λ in LOG_REG_λ:
+    λ = 1e-6
+    quadratic_expansion = [False, True]
+
+    for quadratic in quadratic_expansion:
 
         for application in APPLICATIONS:
 
             for πT, _, _ in APPLICATIONS:
 
-                print("# LOGISTIC REGRESSION MinDCF, λ = {}, πT = {}, {} #".format(λ, πT, application))
+                print("# LOGISTIC REGRESSION MinDCF, Quadratic = {}, λ = {}, πT = {}, {} #".format(quadratic, λ, πT, application))
 
                 # Raw features #
-                lr_minDCF = logistic_regression_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, LVAL, λ, πT, application)
+                lr_minDCF = logistic_regression_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, LVAL, λ, πT, quadratic, application)
                 print("RAW: {:.3f}".format(lr_minDCF))
 
                 # Z-NORMALIZED FEATURES #
-                lr_minDCF = logistic_regression_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, λ, πT, application)
+                lr_minDCF = logistic_regression_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, λ, πT, quadratic, application)
                 print("Z-NORMALIZED: {:.3f}".format(lr_minDCF))
 
                 # GAUSSIANIZED FEATURES #
-                lr_minDCF = logistic_regression_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, λ, πT, application)
+                lr_minDCF = logistic_regression_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, λ, πT, quadratic, application)
                 print("GAUSSIANIZED: {:.3f}".format(lr_minDCF))

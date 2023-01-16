@@ -59,15 +59,15 @@ if __name__ == "__main__":
     #######################
     
     # Hyperparameter selection
-    LR_λ_selection(
-        DTR_kfold_gaussianized,
-        DTR_kfold_z_normalized,
-        LTR_kfold,
-        DVAL_kfold_gaussianized,
-        DVAL_kfold_z_normalized,
-        LVAL
-    )
-
+    # LR_λ_selection(
+    #     DTR_kfold_gaussianized,
+    #     DTR_kfold_z_normalized,
+    #     LTR_kfold,
+    #     DVAL_kfold_gaussianized,
+    #     DVAL_kfold_z_normalized,
+    #     LVAL
+    # )
+    
     # Model evaluation
     evaluate_LR_models(
         DTR_kfold_raw,

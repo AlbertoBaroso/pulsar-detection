@@ -185,6 +185,7 @@ def logistic_regression_kfold(
     validation_labels: numpy.ndarray,
     λ: float,
     πT: float,
+    quadratic: bool,
     application: tuple[float, float, float],
 ) -> float:
     """
@@ -197,6 +198,7 @@ def logistic_regression_kfold(
         validation_labels: (numpy.array):   Validation labels, of shape (m, )
         λ (float):                          Regularization parameter
         πT (float):                         Prior probability of the first class
+        quadratic (bool):                   Whether to use quadratic feature expansion
         application (tuple):                Effective prior, Cost of false positive, Cost of false negative
     """
 
@@ -206,9 +208,10 @@ def logistic_regression_kfold(
     for DTR, LTR, DVAL in zip(training_samples, training_labels, validation_samples):
 
         # Train model
-        model = LogisticRegression(DTR, LTR, λ, πT)
+        model = LogisticRegression(DTR, LTR, λ, πT, quadratic)
+        
         # Compute scores for each class
-        fold_scores.append(model.score_samples(DVAL))
+        fold_scores.append(model.score_samples(DVAL, quadratic))
 
     scores = numpy.hstack(fold_scores)
 
