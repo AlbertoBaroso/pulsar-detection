@@ -7,9 +7,9 @@ from data_processing.utils import vcol, vrow, extended_data_matrix
 
 
 class KernelType(Enum):
-    NO_KERNEL = 0
-    POLYNOMIAL = 1
-    RBF = 2
+    NO_KERNEL = "Linear SVM"
+    POLYNOMIAL = "Polynomial kernel SVM"
+    RBF = "RBF kernel SVM"
 
 
 class SVM:

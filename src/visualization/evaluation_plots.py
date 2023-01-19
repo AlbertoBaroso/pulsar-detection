@@ -33,18 +33,23 @@ def bayes_error_plot(scores: numpy.ndarray, labels: numpy.ndarray) -> None:
     plt.show()
 
 
-def plot_minDCF_LR(title: str, applications: dict):
+def plot_minDCF(title: str, hyperparameter: str, x_axis: list, applications: dict, log_scale: bool = False, max_y: float = 1.1, param_name='$\tilde{\pi}$', extra = '0.5) - ') -> None:
 
     colors = ["r", "b", "g"]
+    xi = x_axis if log_scale else list(range(len(x_axis)))
 
     for i, (application, minDCFs) in enumerate(applications.items()):
 
-        plt.plot(LOG_REG_λ, minDCFs, label=r'minDCF($\tilde{\pi}$ = ' + str(application[0]) + ")", color=colors[i])
+        param_value = str(application[0]) + ')' if type(application) is tuple else extra + str(application)
+        plt.plot(xi, minDCFs, label=r'minDCF(' + param_name + ' = ' + param_value, color=colors[i])
 
     plt.title(title)
-    plt.xlabel("λ")
+    plt.xlabel(hyperparameter)
     plt.ylabel("minDCF")
-    plt.xscale('log')
-    plt.ylim([0, 1])
+    if log_scale:
+        plt.xscale('log')
+    else:
+        plt.xticks(xi, x_axis)
+    plt.ylim([0, max_y])
     plt.legend()
     plt.show()

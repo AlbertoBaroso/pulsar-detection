@@ -10,7 +10,7 @@ def print_separator(title: str = None):
     
     SEPARATOR_LENGTH = 40
     SEPARATOR = "#"
-    print(SEPARATOR * SEPARATOR_LENGTH)
+    print("\n" + SEPARATOR * SEPARATOR_LENGTH)
     
     if title is not None:
     

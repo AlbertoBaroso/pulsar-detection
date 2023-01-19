@@ -7,10 +7,10 @@ import scipy
 
 # MVG Model types
 class MVGModel(Enum):
-    MVG = 1
-    NAIVE = 2
-    TIED = 3
-    TIED_NAIVE = 4
+    MVG = "Full Covariance"
+    NAIVE = "Diagonal Covariance"
+    TIED = "Tied Covariance"
+    TIED_NAIVE = "Diagonal Tied Covariance"
 
 class MVG:
     
