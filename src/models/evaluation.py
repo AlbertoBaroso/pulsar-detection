@@ -1,7 +1,7 @@
+from constants import APPLICATIONS, K, LABELS, LOG_REG_λ, SVM_K, SVM_C, SVM_c, SVM_γ, GMM_STEPS
 from models.train import mvg_kfold, logistic_regression_kfold, svm_kfold, gmm_kfold
-from constants import APPLICATIONS, K, LABELS, LOG_REG_λ, SVM_K, SVM_C, SVM_γ, GMM_STEPS
+from visualization.evaluation_plots import plot_minDCF, bayes_error_plot
 from data_processing.dimensionality_reduction import pca
-from visualization.evaluation_plots import plot_minDCF
 from visualization.print import print_separator
 from data_processing.utils import project_data
 from data_processing.validation import kfold
@@ -99,22 +99,14 @@ def SVM_C_selection(
     DVAL_kfold_gaussianized: numpy.ndarray,
     DVAL_kfold_z_normalized: numpy.ndarray,
     LVAL: numpy.ndarray,
-    kernel_type: KernelType = KernelType.NO_KERNEL
 ) -> None:
     """
     Evaluate different values of the hyperparameter C for Support Vector Machines by plotting the minDCF
     """
 
     πTs = [None, 0.5]
-        
-    if kernel_type == KernelType.RBF:
-        kernel_params = (0.5)
-    elif kernel_type == KernelType.POLYNOMIAL:
-        kernel_params = (2, 0)
-    else:
-        kernel_params = None
-    
-    import datetime
+    kernel_params = None
+    kernel_type = KernelType.NO_KERNEL
 
     print_separator(kernel_type.value + ", hyperparameter selection")
 
@@ -126,31 +118,42 @@ def SVM_C_selection(
         minDCFs["gaussianized"][πT] = {}
 
         for application in APPLICATIONS:
-            
-            print(">>>>> πT = {} - {} <<<<<".format(πT, application))
 
             minDCFs["z-normalized"][πT][application] = []
             minDCFs["gaussianized"][πT][application] = []
 
             for C in SVM_C:
-                
-                print("{}, ".format(C), end="", flush=True)
 
                 minDCFs["z-normalized"][πT][application].append(
                     svm_kfold(
-                        DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, SVM_K, C, kernel_type, kernel_params, πT, application
+                        DTR_kfold_z_normalized,
+                        LTR_kfold,
+                        DVAL_kfold_z_normalized,
+                        LVAL,
+                        SVM_K,
+                        C,
+                        kernel_type,
+                        kernel_params,
+                        πT,
+                        application,
                     )
                 )
                 minDCFs["gaussianized"][πT][application].append(
                     svm_kfold(
-                        DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, SVM_K, C, kernel_type, kernel_params, πT, application
+                        DTR_kfold_gaussianized,
+                        LTR_kfold,
+                        DVAL_kfold_gaussianized,
+                        LVAL,
+                        SVM_K,
+                        C,
+                        kernel_type,
+                        kernel_params,
+                        πT,
+                        application,
                     )
                 )
-                
-                print("<< {} >>".format(datetime.datetime.now()))
 
     # Plot Z-NORMALIZED minDCFs
-    print("DCFS: ", minDCFs["z-normalized"][πTs[0]])
     plot_minDCF(kernel_type.value + ", Z-Normalized features, Unbalanced", "C", SVM_C, minDCFs["z-normalized"][πTs[0]], True)
     plot_minDCF(kernel_type.value + ", Z-Normalized features, Balanced", "C", SVM_C, minDCFs["z-normalized"][πTs[1]], True)
 
@@ -161,53 +164,59 @@ def SVM_C_selection(
     print_separator()
 
 
-def SVM_C_γ_selection(
+def SVM_C_kernel_selection(
     DTR_kfold_gaussianized: numpy.ndarray,
     DTR_kfold_z_normalized: numpy.ndarray,
     LTR_kfold: numpy.ndarray,
     DVAL_kfold_gaussianized: numpy.ndarray,
     DVAL_kfold_z_normalized: numpy.ndarray,
-    LVAL: numpy.ndarray
+    LVAL: numpy.ndarray,
+    kernel_type: KernelType,
 ) -> None:
     """
-    Evaluate different values of the hyperparameters C and γ for Support Vector Machines with RBF Kernel by plotting the minDCF
+    Evaluate different values of the hyperparameter C and parameters of the kernel for Support Vector Machines by plotting the minDCF
     """
 
     import datetime
 
-    print_separator("RBF Kernel SVM, hyperparameter selection")
+    print_separator(kernel_type.value + ", hyperparameter selection")
 
     minDCFs = {"z-normalized": {}, "gaussianized": {}}
     application = APPLICATIONS[0]
 
-    for γ in SVM_γ: 
+    if kernel_type == KernelType.RBF:
+        kernel_params = [(γ) for γ in SVM_γ]
+        param_name = r"$\tilde{\pi} = 0.5) - \gamma$"
+    elif kernel_type == KernelType.POLYNOMIAL:
+        d = 2  # Quadratic polynomial
+        kernel_params = [(d, c) for c in SVM_c]
+        param_name = r"$\tilde{\pi}$ = 0.5) - c"
         
-        minDCFs["z-normalized"][γ] = []
-        minDCFs["gaussianized"][γ] = []
-        
-        for C in SVM_C:
-            
-            print("C={}, γ={} ".format(C, γ), end="", flush=True)
+    for params in kernel_params:
 
-            minDCFs["z-normalized"][γ].append(
-                svm_kfold(
-                    DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, SVM_K, C, KernelType.RBF, (γ), None, application
-                )
+        metric = params[-1]
+        minDCFs["z-normalized"][metric] = []
+        minDCFs["gaussianized"][metric] = []
+
+        for C in SVM_C:
+
+            minDCFs["z-normalized"][metric].append(
+                svm_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, SVM_K, C, kernel_type, params, 0.5, application)
             )
-            minDCFs["gaussianized"][γ].append(
-                svm_kfold(
-                    DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, SVM_K, C, KernelType.RBF, (γ), None, application
-                )
+            minDCFs["gaussianized"][metric].append(
+                svm_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, SVM_K, C, kernel_type, params, 0.5, application)
             )
-            
-            print("[{}, {}] << {} >>".format(minDCFs["z-normalized"][γ], minDCFs["gaussianized"][γ], datetime.datetime.now()))
+
 
     # Plot Z-NORMALIZED minDCFs
-    print("DCFS: ", minDCFs["z-normalized"])
-    plot_minDCF(KernelType.RBF.value + ", Z-Normalized features, Unbalanced", "C", SVM_C, minDCFs["z-normalized"], True, param_name='$\lambda$', extra='')
+    plot_minDCF(
+        kernel_type.value + ", Z-Normalized features", "C", SVM_C, minDCFs["z-normalized"], True, param_name=param_name, extra=""
+    )
 
     # # Plot GAUSSIANIZED minDCFs
-    plot_minDCF(KernelType.RBF.value + ", Gaussianized features, Unbalanced", "C", SVM_C, minDCFs["gaussianized"], True, param_name='$\lambda$', extra='')
+    plot_minDCF(
+        kernel_type.value + ", Gaussianized features", "C", SVM_C, minDCFs["gaussianized"], True, param_name=param_name, extra=""
+    )
 
     print(minDCFs)
 
@@ -228,15 +237,10 @@ def GMM_components_selection(
 
     print_separator("GMM hyperparameter selection")
 
-    minDCFs = {
-        model_type: {"Z-normalization": [], "Gaussianization": []}
-        for model_type in MVGModel
-    }
-    
-    import datetime
-    
+    minDCFs = {model_type: {"Z-normalization": [], "Gaussianization": []} for model_type in MVGModel}
+
     for steps in GMM_STEPS:
-        
+
         # GAUSSIANIZED FEATURES #
         validated_gmm_models = gmm_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, (0.5, 1, 1), steps)
         for model_type, gmm_minDCF in validated_gmm_models.items():
@@ -246,9 +250,6 @@ def GMM_components_selection(
         validated_gmm_models = gmm_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, (0.5, 1, 1), steps)
         for model_type, gmm_minDCF in validated_gmm_models.items():
             minDCFs[model_type]["Gaussianization"].append(gmm_minDCF)
-            
-        print("{} Components finished at: {}".format(2**steps, datetime.datetime.now()))
-            
 
     components = numpy.power(2, numpy.array(GMM_STEPS))
     for model_type in MVGModel:
@@ -356,12 +357,10 @@ def evaluate_SVM_models(
     print_separator("SVM MODELS")
 
     svm_params = [
-        (1.0, 1e-2, KernelType.NO_KERNEL, None),
-        # (1.0, 1e-2, KernelType.POLYNOMIAL, (2, 0)),
-        # (0.0, 1e-2, KernelType.RBF, (1.0)),
-        # (0.0, 1e-2, KernelType.RBF, (10.0)),
-        # (1.0, 1e-2, KernelType.RBF, (1.0)),
-        # (1.0, 1e-2, KernelType.RBF, (10.0)),
+        # (1.0, 1e-1, KernelType.NO_KERNEL, None),
+        (1.0, 1, KernelType.POLYNOMIAL, (2, 0.1)),
+        (1.0, 1, KernelType.POLYNOMIAL, (2, 1)),
+        # (1.0, 1e2, KernelType.RBF, (0.1)),
     ]
 
     for K, C, kernel_type, kernel_params in svm_params:
@@ -404,28 +403,96 @@ def evaluate_GMM_models(
 
     print_separator("GMM MODELS")
 
-    steps = 10  # TODO
+    steps = {
+        MVGModel.MVG: 3,
+        MVGModel.TIED: 5,
+        MVGModel.NAIVE: 5,
+        MVGModel.TIED_NAIVE: 5,
+    }
 
     for application in APPLICATIONS:
 
-        print("# GMM - {} - {} components #".format(application, 2**steps))
+        print("# GMM - {} #".format(application))
 
         # RAW FEATURES #
         validated_gmm_models = gmm_kfold(DTR_kfold_raw, LTR_kfold, DVAL_kfold_raw, LVAL, application, steps)
         print("# RAW Features #")
         for model_type, gmm_minDCF in validated_gmm_models.items():
-            print("{}: {:.3f}".format(model_type, gmm_minDCF))
+            print("{} - {} components: {:.3f}".format(model_type, 2 ** steps[model_type], gmm_minDCF))
 
         # GAUSSIANIZED FEATURES #
         validated_gmm_models = gmm_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, application, steps)
         print("# GAUSSIANIZED Features #")
         for model_type, gmm_minDCF in validated_gmm_models.items():
-            print("{}: {:.3f}".format(model_type, gmm_minDCF))
+            print("{} - {} components: {:.3f}".format(model_type, 2 ** steps[model_type], gmm_minDCF))
 
         # Z-NORMALIZED FEATURES #
         validated_gmm_models = gmm_kfold(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL, application, steps)
         print("# Z-NORMALIZED Features #")
         for model_type, gmm_minDCF in validated_gmm_models.items():
-            print("{}: {:.3f}".format(model_type, gmm_minDCF))
+            print("{} - {} components: {:.3f}".format(model_type, 2 ** steps[model_type], gmm_minDCF))
 
     print_separator()
+
+
+####################
+# Model Comparison #
+####################
+
+
+def act_vs_min_DCF_best_models(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL):
+
+    # Train models
+
+    best_models = {
+        "MVG Tied Full Covariance": mvg_kfold(
+            DTR_kfold_z_normalized,
+            LTR_kfold,
+            DVAL_kfold_z_normalized,
+            LVAL,
+            LABELS,
+            application=(0.5, 1, 1),
+            models=[MVGModel.TIED],
+            return_scores=True,
+        )[MVGModel.TIED],
+        "Logistic Regression $(\lambda = 10^{-6}, \pi_T = 0.1)$": logistic_regression_kfold(
+            DTR_kfold_z_normalized,
+            LTR_kfold,
+            DVAL_kfold_z_normalized,
+            LVAL,
+            1e-6,
+            πT=0.1,
+            quadratic=False,
+            application=(0.5, 1, 1),
+            return_scores=True,
+        ),
+        "Linear SVM (C = $10^{-1}$, $\pi_T = 0.1$)": svm_kfold(
+            DTR_kfold_z_normalized,
+            LTR_kfold,
+            DVAL_kfold_z_normalized,
+            LVAL,
+            1.0,
+            1e-1,
+            KernelType.NO_KERNEL,
+            None,
+            πT=0.1,
+            application=(0.5, 1, 1),
+            return_scores=True,
+        ),
+        "GMM Full Covariance (8 components)": gmm_kfold(
+            DTR_kfold_z_normalized,
+            LTR_kfold,
+            DVAL_kfold_z_normalized,
+            LVAL,
+            application=(0.5, 1, 1),
+            steps=3,
+            models=[MVGModel.MVG],
+            return_scores=True,
+        )[MVGModel.MVG]
+    }
+
+    # Draw Bayes error plots
+
+    for model, scores in best_models.items():
+
+        bayes_error_plot(model, scores, LVAL)

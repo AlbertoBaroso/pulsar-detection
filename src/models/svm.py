@@ -31,8 +31,8 @@ class SVM:
         X̂ = numpy.vstack((DTR, numpy.full((1, N), K)))  # The augmented data matrix
 
         self.kernel = kernel
-        kernel = kernel if kernel is not None else numpy.dot(X̂.T, X̂)
-        self.Ĥ = vcol(Z) * vrow(Z) * kernel
+        H = kernel if kernel is not None else numpy.dot(X̂.T, X̂)
+        self.Ĥ = vcol(Z) * vrow(Z) * H
 
         self.πT = πT
         self.C = C
@@ -115,10 +115,12 @@ class SVM:
         return kernel + const
 
     def polynomial_scores(self, DTR, DTE, c, d, const):
-        return numpy.dot((vcol(self.α_star) * vcol(self.Z)).T, SVM.polynomial_kernel(DTR, DTE, c, d, const))
+        return numpy.dot(self.α_star * self.Z, SVM.polynomial_kernel(DTR, DTE, c, d, const))
+        # return numpy.dot((vcol(self.α_star) * vcol(self.Z)).T, SVM.polynomial_kernel(DTR, DTE, c, d, const))
 
     def RBF_scores(self, DTR, DTE, γ, const):
-        return numpy.dot((vcol(self.α_star) * vcol(self.Z)).T, SVM.RBF_kernel(DTR, DTE, γ, const))
+        return numpy.dot(self.α_star * self.Z, SVM.RBF_kernel(DTR, DTE, γ, const))
+        # return numpy.dot((vcol(self.α_star) * vcol(self.Z)).T, SVM.RBF_kernel(DTR, DTE, γ, const))
 
 
 """

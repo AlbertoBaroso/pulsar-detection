@@ -1,4 +1,4 @@
-from models.evaluation import PCA_m_selection, evaluate_MVG_models, evaluate_LR_models, LR_λ_selection, SVM_C_selection, SVM_C_γ_selection, evaluate_SVM_models, GMM_components_selection, evaluate_GMM_models
+from models.evaluation import PCA_m_selection, evaluate_MVG_models, evaluate_LR_models, LR_λ_selection, SVM_C_selection, SVM_C_kernel_selection, evaluate_SVM_models, GMM_components_selection, evaluate_GMM_models, act_vs_min_DCF_best_models
 from data_processing.data_load import load_training, load_test, load_preprocessed
 from data_processing.utils import shuffle_data
 from models.svm import KernelType
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # PCA hyper parameter selection #
     #################################
 
-    PCA_m_selection(training_samples, training_labels)
+    # PCA_m_selection(training_samples, training_labels)
 
     ##############
     # MVG Models #
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     )
     
     # Hyperparameter selection: Polynomial kernel SVM
-    SVM_C_selection(
+    SVM_C_kernel_selection(
         DTR_kfold_gaussianized,
         DTR_kfold_z_normalized,
         LTR_kfold,
@@ -104,13 +104,14 @@ if __name__ == "__main__":
     )
     
     # Hyperparameter selection: RBF kernel SVM
-    SVM_C_γ_selection(
+    SVM_C_kernel_selection(
         DTR_kfold_gaussianized,
         DTR_kfold_z_normalized,
         LTR_kfold,
         DVAL_kfold_gaussianized,
         DVAL_kfold_z_normalized,
-        LVAL
+        LVAL,
+        KernelType.RBF
     )
 
     # Model evaluation
@@ -139,7 +140,7 @@ if __name__ == "__main__":
         LVAL
     )
 
-    # Model evaluation
+    #Model evaluation
     evaluate_GMM_models(
         DTR_kfold_raw,
         DTR_kfold_gaussianized,
@@ -149,4 +150,13 @@ if __name__ == "__main__":
         DVAL_kfold_gaussianized,
         DVAL_kfold_z_normalized,
         LVAL
+    )
+
+    
+    ####################
+    # Model Comparison #
+    ####################
+    
+    act_vs_min_DCF_best_models(
+        DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL
     )
