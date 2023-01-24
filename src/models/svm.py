@@ -3,7 +3,7 @@ import numpy
 import scipy
 import scipy.optimize
 import scipy.special
-from data_processing.utils import vcol, vrow, extended_data_matrix
+from data_processing.utils import vcol, vrow
 
 
 class KernelType(Enum):
@@ -115,12 +115,10 @@ class SVM:
         return kernel + const
 
     def polynomial_scores(self, DTR, DTE, c, d, const):
-        return numpy.dot(self.α_star * self.Z, SVM.polynomial_kernel(DTR, DTE, c, d, const))
-        # return numpy.dot((vcol(self.α_star) * vcol(self.Z)).T, SVM.polynomial_kernel(DTR, DTE, c, d, const))
+        return (numpy.dot((vcol(self.α_star) * vcol(self.Z)).T, SVM.polynomial_kernel(DTR, DTE, c, d, const))).ravel()
 
     def RBF_scores(self, DTR, DTE, γ, const):
-        return numpy.dot(self.α_star * self.Z, SVM.RBF_kernel(DTR, DTE, γ, const))
-        # return numpy.dot((vcol(self.α_star) * vcol(self.Z)).T, SVM.RBF_kernel(DTR, DTE, γ, const))
+        return (numpy.dot((vcol(self.α_star) * vcol(self.Z)).T, SVM.RBF_kernel(DTR, DTE, γ, const))).ravel()
 
 
 """

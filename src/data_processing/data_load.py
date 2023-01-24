@@ -3,9 +3,8 @@ from data_processing.analytics import z_normalization
 from data_processing.validation import kfold
 from data_processing.utils import vcol
 from os.path import exists
+from constants import K
 import numpy
-
-from constants import K, PCA_COMPONENTS
 
 
 def load_features() -> list[str]:

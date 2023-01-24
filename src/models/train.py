@@ -3,6 +3,7 @@ from data_processing.comparison import minimum_DCF
 from models.lr import LogisticRegression
 from models.svm import SVM, KernelType
 from models.mvg import MVG, MVGModel
+from constants import LABELS
 from models.gmm import GMM
 from typing import Union
 import numpy
@@ -351,3 +352,54 @@ def svm_kfold(
 
     return scores if return_scores else minDCF
 
+
+
+def train_best_models(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL):
+    best_models = {
+        "MVG Tied Full Covariance": mvg_kfold(
+            DTR_kfold_z_normalized,
+            LTR_kfold,
+            DVAL_kfold_z_normalized,
+            LVAL,
+            LABELS,
+            application=(0.5, 1, 1),
+            models=[MVGModel.TIED],
+            return_scores=True,
+        )[MVGModel.TIED],
+        "Logistic Regression $(\lambda = 10^{-6}, \pi_T = 0.1)$": logistic_regression_kfold(
+            DTR_kfold_z_normalized,
+            LTR_kfold,
+            DVAL_kfold_z_normalized,
+            LVAL,
+            1e-6,
+            πT=0.1,
+            quadratic=False,
+            application=(0.5, 1, 1),
+            return_scores=True,
+        ),
+        "Linear SVM (C = $10^{-1}$, $\pi_T = 0.1$)": svm_kfold(
+            DTR_kfold_z_normalized,
+            LTR_kfold,
+            DVAL_kfold_z_normalized,
+            LVAL,
+            1.0,
+            1e-1,
+            KernelType.NO_KERNEL,
+            None,
+            πT=0.1,
+            application=(0.5, 1, 1),
+            return_scores=True,
+        ),
+        "GMM Full Covariance (8 components)": gmm_kfold(
+            DTR_kfold_z_normalized,
+            LTR_kfold,
+            DVAL_kfold_z_normalized,
+            LVAL,
+            application=(0.5, 1, 1),
+            steps=3,
+            models=[MVGModel.MVG],
+            return_scores=True,
+        )[MVGModel.MVG]
+    }
+    
+    return best_models

@@ -191,7 +191,7 @@ def SVM_C_kernel_selection(
         d = 2  # Quadratic polynomial
         kernel_params = [(d, c) for c in SVM_c]
         param_name = r"$\tilde{\pi}$ = 0.5) - c"
-        
+
     for params in kernel_params:
 
         metric = params[-1]
@@ -207,16 +207,11 @@ def SVM_C_kernel_selection(
                 svm_kfold(DTR_kfold_gaussianized, LTR_kfold, DVAL_kfold_gaussianized, LVAL, SVM_K, C, kernel_type, params, 0.5, application)
             )
 
-
     # Plot Z-NORMALIZED minDCFs
-    plot_minDCF(
-        kernel_type.value + ", Z-Normalized features", "C", SVM_C, minDCFs["z-normalized"], True, param_name=param_name, extra=""
-    )
+    plot_minDCF(kernel_type.value + ", Z-Normalized features", "C", SVM_C, minDCFs["z-normalized"], True, param_name=param_name, extra="")
 
-    # # Plot GAUSSIANIZED minDCFs
-    plot_minDCF(
-        kernel_type.value + ", Gaussianized features", "C", SVM_C, minDCFs["gaussianized"], True, param_name=param_name, extra=""
-    )
+    # Plot GAUSSIANIZED minDCFs
+    plot_minDCF(kernel_type.value + ", Gaussianized features", "C", SVM_C, minDCFs["gaussianized"], True, param_name=param_name, extra="")
 
     print(minDCFs)
 
@@ -357,10 +352,10 @@ def evaluate_SVM_models(
     print_separator("SVM MODELS")
 
     svm_params = [
-        # (1.0, 1e-1, KernelType.NO_KERNEL, None),
+        (1.0, 1e-1, KernelType.NO_KERNEL, None),
         (1.0, 1, KernelType.POLYNOMIAL, (2, 0.1)),
         (1.0, 1, KernelType.POLYNOMIAL, (2, 1)),
-        # (1.0, 1e2, KernelType.RBF, (0.1)),
+        (1.0, 1e2, KernelType.RBF, (0.1)),
     ]
 
     for K, C, kernel_type, kernel_params in svm_params:
@@ -440,59 +435,34 @@ def evaluate_GMM_models(
 ####################
 
 
-def act_vs_min_DCF_best_models(DTR_kfold_z_normalized, LTR_kfold, DVAL_kfold_z_normalized, LVAL):
+def recalibrate_scores(scores: numpy.ndarray, labels: numpy.ndarray, π_tilde: float):
+    """Train a LR model to recalibrate scores"""
 
-    # Train models
+    DTR_kfold, LTR_kfold, DVAL_kfold = numpy.empty(K, dtype=numpy.ndarray), numpy.empty(K, dtype=numpy.ndarray), numpy.empty(K, dtype=numpy.ndarray)
+    for i, (DTR, LTR, DVAL, _LVAL) in enumerate(kfold(scores, labels, K)):
+        DTR_kfold[i], LTR_kfold[i], DVAL_kfold[i] = DTR, LTR, DVAL
 
-    best_models = {
-        "MVG Tied Full Covariance": mvg_kfold(
-            DTR_kfold_z_normalized,
-            LTR_kfold,
-            DVAL_kfold_z_normalized,
-            LVAL,
-            LABELS,
-            application=(0.5, 1, 1),
-            models=[MVGModel.TIED],
-            return_scores=True,
-        )[MVGModel.TIED],
-        "Logistic Regression $(\lambda = 10^{-6}, \pi_T = 0.1)$": logistic_regression_kfold(
-            DTR_kfold_z_normalized,
-            LTR_kfold,
-            DVAL_kfold_z_normalized,
-            LVAL,
-            1e-6,
-            πT=0.1,
-            quadratic=False,
-            application=(0.5, 1, 1),
-            return_scores=True,
-        ),
-        "Linear SVM (C = $10^{-1}$, $\pi_T = 0.1$)": svm_kfold(
-            DTR_kfold_z_normalized,
-            LTR_kfold,
-            DVAL_kfold_z_normalized,
-            LVAL,
-            1.0,
-            1e-1,
-            KernelType.NO_KERNEL,
-            None,
-            πT=0.1,
-            application=(0.5, 1, 1),
-            return_scores=True,
-        ),
-        "GMM Full Covariance (8 components)": gmm_kfold(
-            DTR_kfold_z_normalized,
-            LTR_kfold,
-            DVAL_kfold_z_normalized,
-            LVAL,
-            application=(0.5, 1, 1),
-            steps=3,
-            models=[MVGModel.MVG],
-            return_scores=True,
-        )[MVGModel.MVG]
-    }
+    # Train a LR model to recalibrate scores
+    recalibrated_scores = logistic_regression_kfold(
+        DTR_kfold, LTR_kfold, DVAL_kfold, labels, λ=0, πT=0.5, quadratic=False, application=(π_tilde, 1, 1), return_scores=True
+    )
+    
+    return recalibrated_scores - numpy.log(π_tilde / (1 - π_tilde))
 
-    # Draw Bayes error plots
 
-    for model, scores in best_models.items():
+def recalibrate_models(models: dict, labels: numpy.ndarray):
+    """Recalibrate models scores"""
+
+    for model, scores in models.items():
+        models[model] = recalibrate_scores(numpy.array([scores]), labels, π_tilde=0.5)
+        print("{} recalibrated".format(model))
+        
+    return models
+
+
+def act_vs_min_DCF(models, LVAL):
+    """Draw Bayes error plots"""
+
+    for model, scores in models.items():
 
         bayes_error_plot(model, scores, LVAL)
