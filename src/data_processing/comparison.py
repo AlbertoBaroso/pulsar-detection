@@ -34,6 +34,7 @@ def optimal_bayes_decisions(scores: numpy.ndarray, π1: float, Cfn: float, Cfp: 
     """
     # C = numpy.array([[0, Cfn], [Cfp, 0]]) # Cost matrix
     # π = numpy.array([1 - π1, π1]) # Class priors
+    
     t = -numpy.log(π1 * Cfn / ((1 - π1) * Cfp))  # Threshold
     return (scores > t).astype(int)
 

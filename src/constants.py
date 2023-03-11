@@ -15,8 +15,8 @@ LOG_REG_λ = [0, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e1]
 # Support Vector Machines
 
 SVM_C = [1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2]
-SVM_c = [1e-1, 1e-0, 1e1]
 SVM_γ = [1e-3, 1e-2, 1e-1]
+SVM_c = [1e-1, 1e-0, 1e1]
 SVM_K = 1.0
 
 # Gaussian Mixture Models

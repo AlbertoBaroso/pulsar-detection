@@ -12,8 +12,8 @@ class MVGModel(Enum):
     TIED = "Tied Covariance"
     TIED_NAIVE = "Diagonal Tied Covariance"
 
+
 class MVG:
-    
     def __init__(self, type: MVGModel, DTR: numpy.ndarray, LTR: numpy.ndarray, labels: list[int]):
         """
         Train a multivariate gaussian model
@@ -44,7 +44,7 @@ class MVG:
             µ, Σ = self.train_tied_covariance_naive_bayes_mvg()
         else:
             raise ValueError("Invalid MVG model type")
-        
+
         self.µ, self.Σ = µ, Σ
 
     @staticmethod
@@ -157,7 +157,7 @@ class MVG:
 
         return µ, Σ
 
-    def score_samples(self, DTE: numpy.ndarray, priors: numpy.ndarray) -> numpy.ndarray:
+    def score_samples(self, DTE: numpy.ndarray, priors: numpy.ndarray) -> tuple[numpy.ndarray, numpy.ndarray]:
         """
         Compute the posterior probability for each class,
         Assign to each sample the class with the highest posterior probability
@@ -174,9 +174,13 @@ class MVG:
         # Compute class-conditional probabilities for each class
         S = [MVG.logpdf_GAU_ND(DTE, self.µ[c], self.Σ if self.is_tied else self.Σ[c]) for c in range(len(self.labels))]
 
+        # if α is not None and β is not None and π_tilde is not None:
+        # for i in range(len(S)):
+        #     S[i] = α * S[i] + β - numpy.log(π_tilde / (1 - π_tilde))
+
         # Compute Log Likelihood Ratios
         llr = S[1] - S[0]
-        
+
         # Combine the scores with prior information
         log_priors = vcol(numpy.log(priors))
         log_SJoint = S + log_priors

@@ -58,7 +58,7 @@ def load_test() -> tuple[numpy.ndarray, numpy.ndarray]:
     return load_data("../data/Test.txt")
 
 
-def load_preprocessed(training_samples, training_labels, test_samples, test_labels):
+def load_preprocessed(training_samples, training_labels, test_samples):
 
     # Cached data files #
     folder = "../data/processed/"

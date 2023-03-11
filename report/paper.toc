@@ -1,5 +1,41 @@
-\contentsline {section}{\numberline {1}Problem analysis}{4}{}%
-\contentsline {subsection}{\numberline {1.1}Features}{4}{}%
-\contentsline {subsection}{\numberline {1.2}Feature distributions and ranges}{5}{}%
-\contentsline {subsection}{\numberline {1.3}Feature pairs}{7}{}%
-\contentsline {subsection}{\numberline {1.4}Feature correlation}{10}{}%
+\contentsline {section}{\numberline {1}Problem analysis}{5}{}%
+\contentsline {subsection}{\numberline {1.1}Datasets}{5}{}%
+\contentsline {subsection}{\numberline {1.2}Feature descriptions}{5}{}%
+\contentsline {subsection}{\numberline {1.3}Feature distributions and ranges}{6}{}%
+\contentsline {subsection}{\numberline {1.4}Feature correlation}{8}{}%
+\contentsline {subsection}{\numberline {1.5}Applications}{13}{}%
+\contentsline {section}{\numberline {2}Data preprocessing}{13}{}%
+\contentsline {subsection}{\numberline {2.1}K-fold cross-validation}{13}{}%
+\contentsline {subsection}{\numberline {2.2}Shuffling}{14}{}%
+\contentsline {subsection}{\numberline {2.3}Z-Normalization}{14}{}%
+\contentsline {subsection}{\numberline {2.4}Feature Gaussianization}{14}{}%
+\contentsline {subsection}{\numberline {2.5}Linear Discriminant Analysis}{16}{}%
+\contentsline {subsection}{\numberline {2.6}Principal Component Analysis}{16}{}%
+\contentsline {section}{\numberline {3}Classification}{18}{}%
+\contentsline {subsection}{\numberline {3.1}Gaussian models}{18}{}%
+\contentsline {subsubsection}{\numberline {3.1.1}Multivariate Gaussian Classifier}{18}{}%
+\contentsline {subsubsection}{\numberline {3.1.2}Tied Gaussian Classifier}{18}{}%
+\contentsline {subsubsection}{\numberline {3.1.3}Naive Bayes Gaussian Classifier}{18}{}%
+\contentsline {subsubsection}{\numberline {3.1.4}Tied Naive Bayes Gaussian Classifier}{18}{}%
+\contentsline {subsubsection}{\numberline {3.1.5}Results}{19}{}%
+\contentsline {subsection}{\numberline {3.2}Logistic Regression}{19}{}%
+\contentsline {subsubsection}{\numberline {3.2.1}Hyperparameter tuning: \(\lambda \)}{20}{}%
+\contentsline {subsubsection}{\numberline {3.2.2}Results}{21}{}%
+\contentsline {subsection}{\numberline {3.3}Support Vector Machines}{21}{}%
+\contentsline {subsubsection}{\numberline {3.3.1}Hyperparameter tuning: C}{22}{}%
+\contentsline {subsubsection}{\numberline {3.3.2}Results}{23}{}%
+\contentsline {subsubsection}{\numberline {3.3.3}Support Vector Machines with Polynomial Kernel}{23}{}%
+\contentsline {subsubsection}{\numberline {3.3.4}Support Vector Machines with RBF Kernel}{24}{}%
+\contentsline {subsection}{\numberline {3.4}Gaussian Mixture Models}{25}{}%
+\contentsline {subsubsection}{\numberline {3.4.1}Hyperparameter tuning: number of components}{26}{}%
+\contentsline {subsubsection}{\numberline {3.4.2}Results}{26}{}%
+\contentsline {subsection}{\numberline {3.5}Model selection}{28}{}%
+\contentsline {subsection}{\numberline {3.6}Score recalibration}{30}{}%
+\contentsline {section}{\numberline {4}Experimental results}{32}{}%
+\contentsline {subsection}{\numberline {4.1}Multivariate Gaussian classifiers}{33}{}%
+\contentsline {subsection}{\numberline {4.2}Logistic Regression}{35}{}%
+\contentsline {subsection}{\numberline {4.3}Linear Support Vector Machines}{36}{}%
+\contentsline {subsection}{\numberline {4.4}Support Vector Machines with Polynomial kernel}{36}{}%
+\contentsline {subsection}{\numberline {4.5}Support Vector Machines with RBF kernel}{38}{}%
+\contentsline {subsection}{\numberline {4.6}Gaussian Mixture Models}{39}{}%
+\contentsline {section}{\numberline {5}Conclusions}{40}{}%

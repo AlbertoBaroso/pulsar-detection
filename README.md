@@ -9,7 +9,9 @@ The goal of this project is to employ data preprocessing techniques and machine 
 - Tied Covariance Gaussian Classifier
 - Naive Bayes Classifier
 - Tied Naive Bayes Classifier
+- Gaussian Mixture Models
+- Support vector machines (with RBF and Polynomial kernels)
 
-The detailed project report is available [here](./report/paper.pdf). \[WIP\]
+The detailed project report is available [here](./report/paper.pdf).
 
 This project was developed for the Machine learning and pattern recognition course @ PoliTo.    

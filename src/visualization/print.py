@@ -8,7 +8,7 @@ def print_separator(title: str = None):
         title (str, optional): Optional title to display in the middle of the separator. Defaults to None.
     """
     
-    SEPARATOR_LENGTH = 40
+    SEPARATOR_LENGTH = 60
     SEPARATOR = "#"
     print("\n" + SEPARATOR * SEPARATOR_LENGTH)
     
